@@ -10,7 +10,7 @@ public class IndexController {
     @GetMapping("/inicio")
     public String inicio(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
-            return "pages/index"; // Página pública
+            return "index"; // Página pública
         }
 
         // Si está autenticado, redirigir según rol
