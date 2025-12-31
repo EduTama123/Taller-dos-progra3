@@ -10,6 +10,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @Controller
@@ -22,75 +23,73 @@ public class UsuarioController {
     @Autowired
     private AccountService accountService;
 
-    // FORMULARIO PARA CREAR USUARIO
     @GetMapping("/formUsuario")
-    public String crearUsuario(
+    public String mostrarFormularioUsuario(
             @RequestParam(value = "accountId", required = false) Long accountId,
             Model model) {
 
+        List<Account> cuentas = accountService.findAll();
         Usuario usuario = new Usuario();
 
-        // Si viene accountId, vincular con la cuenta recién creada
         if (accountId != null) {
-            Account account = accountService.buscarUserById(accountId)
-                    .orElseThrow(() -> new RuntimeException("CUENTA NO ENCONTRADA"));
+            Account account = accountService.findById(accountId)
+                    .orElseThrow(() -> new RuntimeException("Cuenta no encontrada"));
             usuario.setAccount(account);
-            model.addAttribute("esRegistroNuevo", true);
         }
 
         model.addAttribute("usuario", usuario);
+        model.addAttribute("cuentas", cuentas);
+        model.addAttribute("accountId", accountId);
+
         return "pages/usuarioForm";
     }
 
-    // GUARDAR USUARIO
-    @PostMapping("/registrarUsuario")
+    @PostMapping("/guardar")
     public String guardarUsuario(
-            @Valid @ModelAttribute Usuario usuario,
-            BindingResult result,
-            @RequestParam(value = "esRegistroNuevo", required = false) Boolean esRegistroNuevo,
+            @RequestParam String nombre,
+            @RequestParam String apellido,
+            @RequestParam String cedula,
+            @RequestParam Integer edad,
+            @RequestParam String telefono,
+            @RequestParam String direccion,
+            @RequestParam(value = "accountId", required = false) Long accountId,
             Model model) {
 
-        if (result.hasErrors()) {
+        // Crear nuevo usuario
+        Usuario usuario = new Usuario();
+        usuario.setNombre(nombre);
+        usuario.setApellido(apellido);
+        usuario.setCedula(cedula);
+        usuario.setEdad(edad);
+        usuario.setTelefono(telefono);
+        usuario.setDireccion(direccion);
+
+        // Asociar cuenta si viene accountId
+        if (accountId != null) {
+            Account account = accountService.findById(accountId)
+                    .orElseThrow(() -> new RuntimeException("Cuenta no encontrada"));
+            usuario.setAccount(account);
+        }
+
+        // Validar que tenga cuenta asociada
+        if (usuario.getAccount() == null) {
+            List<Account> cuentas = accountService.findAll();
+            model.addAttribute("cuentas", cuentas);
             model.addAttribute("usuario", usuario);
+            model.addAttribute("error", "Debe seleccionar una cuenta asociada");
             return "pages/usuarioForm";
         }
 
-        // Guardar usuario
         usuarioService.guardarUsuario(usuario);
-
-        // Si es nuevo registro, redirigir a login para que inicie sesión
-        if (esRegistroNuevo != null && esRegistroNuevo) {
-            return "redirect:/login?registro=completo";
-        }
-
-        // Si no es nuevo registro, redirigir a lista de usuarios
         return "redirect:/usuarios";
     }
 
-    // RESTO DE MÉTODOS (mantener igual)
-    @GetMapping
-    public String listaUsuarios(Model model) {
-        List<Usuario> usuarios = usuarioService.mostrarUsuarios();
-        model.addAttribute("usuarios", usuarios);
-        return "pages/usuarioList";
-    }
-
-    @GetMapping("/editarUsuario/{id}")
+    @GetMapping("/formUsuario/{id}")
     public String editarUsuario(@PathVariable Long id, Model model) {
         Usuario usuario = usuarioService.buscarUsuarioById(id);
+        List<Account> cuentas = accountService.findAll();
         model.addAttribute("usuario", usuario);
+        model.addAttribute("cuentas", cuentas);
         return "pages/usuarioForm";
-    }
-
-    @PostMapping("/actualizarUsuario/{id}")
-    public String procesarActualizacion(@PathVariable Long id, @Valid @ModelAttribute Usuario usuario) {
-        usuarioService.actualizarUsuario(id, usuario);
-        return "redirect:/usuarios";
-    }
-
-    @PostMapping("/eliminarUsuario/{id}")
-    public String eliminarUsuario(@PathVariable Long id) {
-        usuarioService.eliminarUsuario(id);
-        return "redirect:/usuarios";
     }
 }

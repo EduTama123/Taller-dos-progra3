@@ -2,126 +2,146 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Crear cuenta</title>
-    <!--FAVICON-->
+    <title>Registro Completo - CureStress</title>
     <link rel="icon" th:href="@{/images/pruebaEstres.png}">
     <link href="https://cdn.jsdelivr.net/npm/flowbite@4.0.1/dist/flowbite.min.css" rel="stylesheet" />
-    <script src="https://cdn.jsdelivr.net/npm/flowbite@4.0.1/dist/flowbite.min.js"></script>
     <link rel="stylesheet" th:href="@{/css/styles.css}">
-    <link rel="stylesheet" th:href="@{/css/userRegister.css}">
 </head>
 <body>
-<!--barra de navegacion-->
+
 <header class="sticky w-full top-0 z-50">
-    <!--primer nav-->
     <nav class="navbar-top">
         <div class="flex flex-wrap justify-between items-center mx-auto max-w-screen-xl p-4">
-            <a class="logo flex items-center space-x-3 rtl:space-x-reverse">
+            <a th:href="@{/inicio}" class="logo flex items-center space-x-3 rtl:space-x-reverse">
                 <img th:src="@{/images/pruebaEstres.png}" class="h-7" alt="CureStress Logo" />
                 <span class="self-center text-xl font-semibold whitespace-nowrap">CureStress</span>
             </a>
         </div>
     </nav>
+</header>
 
-    <!--segundo nav-->
-    <nav class="navbar-bottom">
-        <div class="max-w-screen-xl px-4 py-3 mx-auto">
-            <div class="flex items-center justify-center">
-                <ul class="flex flex-row font-medium mt-0 space-x-8 rtl:space-x-reverse text-sm">
-                    <li><a th:href="@{/inicio}" class="nav-link" aria-current="page">Home</a></li>
-                </ul>
+<div class="container mx-auto px-4 py-8 max-w-3xl">
+    <h1 class="text-3xl font-bold text-center mb-2">Registro Completo</h1>
+    <p class="text-gray-600 text-center mb-8">Cree su cuenta y complete sus datos personales</p>
+
+    <form th:action="@{/auth/registro}" method="post" class="bg-white shadow-lg rounded-lg p-6">
+
+        <!-- SECCIÓN 1: DATOS DE LOGIN -->
+        <div class="mb-8 pb-6 border-b">
+            <h2 class="text-xl font-semibold mb-4 text-blue-600">Datos de Login</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Username -->
+                <div>
+                    <label for="username" class="block text-sm font-medium text-gray-700 mb-2">
+                        Nombre de Usuario: <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" id="username" name="username" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                </div>
+
+                <!-- Email -->
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+                        Correo Electrónico: <span class="text-red-500">*</span>
+                    </label>
+                    <input type="email" id="email" name="email" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                </div>
+
+                <!-- Password -->
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+                        Contraseña: <span class="text-red-500">*</span>
+                    </label>
+                    <input type="password" id="password" name="password" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                </div>
+
+                <!-- Confirm Password -->
+                <div>
+                    <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-2">
+                        Confirmar Contraseña: <span class="text-red-500">*</span>
+                    </label>
+                    <input type="password" id="confirmPassword" name="confirmPassword" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                </div>
             </div>
         </div>
-    </nav>
-</header>
-<!-- FORMULARIO -->
-<div class="form-container flex items-center justify-center min-h-screen bg-white">
-    <form th:action="@{/cuentas/registrarCuenta}" method="post" th:object="${account}"
-          class="form-wrapper w-full max-w-md bg-white border border-gray-200 rounded-xl p-8 shadow-lg space-y-6">
 
-        <!--encabezado-->
-        <div class="form-header text-center">
-            <h2 class="form-title text-2xl font-bold mb-2">
-                Registro de usuario
-            </h2>
-        </div>
-        <input type="number" id="id" name="id" th:field="*{id}" hidden>
-        <!--campos-->
-        <div class="form-group">
-            <label for="nombre" class="form-label block text-sm font-medium text-gray-700 mb-2">
-                Nombre
-            </label>
-            <input type="text" id="nombre" name="nombre" th:field="*{nombre}"
-                   class="form-input mt-1 block w-full rounded-lg border border-gray-300 bg-white px-4 py-3
-                    text-sm text-gray-900 focus:border-orange-400 focus:ring-2 focus:ring-orange-200 transition-colors" />
-        </div>
+        <!-- SECCIÓN 2: DATOS PERSONALES -->
+        <div>
+            <h2 class="text-xl font-semibold mb-4 text-green-600">Datos Personales</h2>
 
-        <div class="form-group">
-            <label for="username" class="form-label block text-sm font-medium text-gray-700 mb-2">
-                User Name
-            </label>
-            <input type="text" id="username" name="username" th:field="*{username}"
-                   class="form-input mt-1 block w-full rounded-lg border border-gray-300 bg-white px-4 py-3
-                    text-sm text-gray-900 focus:border-orange-400 focus:ring-2 focus:ring-orange-200 transition-colors" />
-        </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Nombre -->
+                <div>
+                    <label for="nombre" class="block text-sm font-medium text-gray-700 mb-2">
+                        Nombre: <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" id="nombre" name="nombre" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                </div>
 
-        <div class="form-group">
-            <label for="password" class="form-label block text-sm font-medium text-gray-700 mb-2">
-                Contraseña
-            </label>
-            <input type="password" id="password" name="password" th:field="*{password}"
-                   class="form-input mt-1 block w-full rounded-lg border border-gray-300 bg-white px-4 py-3
-                    text-sm text-gray-900 focus:border-orange-400 focus:ring-2 focus:ring-orange-200 transition-colors" />
-        </div>
+                <!-- Apellido -->
+                <div>
+                    <label for="apellido" class="block text-sm font-medium text-gray-700 mb-2">
+                        Apellido: <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" id="apellido" name="apellido" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                </div>
 
-        <!--boton-->
-        <div class="form-actions pt-4">
+                <!-- Cédula -->
+                <div>
+                    <label for="cedula" class="block text-sm font-medium text-gray-700 mb-2">
+                        Cédula: <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" id="cedula" name="cedula" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                </div>
+
+                <!-- Edad -->
+                <div>
+                    <label for="edad" class="block text-sm font-medium text-gray-700 mb-2">
+                        Edad: <span class="text-red-500">*</span>
+                    </label>
+                    <input type="number" id="edad" name="edad" min="1" max="120" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                </div>
+
+                <!-- Teléfono -->
+                <div>
+                    <label for="telefono" class="block text-sm font-medium text-gray-700 mb-2">
+                        Teléfono: <span class="text-red-500">*</span>
+                    </label>
+                    <input type="tel" id="telefono" name="telefono" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                </div>
+
+                <!-- Dirección -->
+                <div class="md:col-span-2">
+                    <label for="direccion" class="block text-sm font-medium text-gray-700 mb-2">
+                        Dirección: <span class="text-red-500">*</span>
+                    </label>
+                    <textarea id="direccion" name="direccion" rows="3" required
+                              class="w-full px-3 py-2 border border-gray-300 rounded-md"></textarea>
+                </div>
+            </div>
+        </div>
+                <!-- Botones -->
+        <div class="mt-8 flex justify-between">
+            <a th:href="@{/login}"
+               class="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                ¿Ya tienes cuenta? Inicia Sesión
+            </a>
             <button type="submit"
-                    class="submit-button w-full rounded-lg px-4 py-3 text-sm font-medium text-white
-                     focus:outline-none focus:ring-2 focus:ring-orange-300 focus:ring-offset-2 transition-all">
-                Crear
+                    class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                Registrarse
             </button>
         </div>
-    </form>
-</div>
-<!--footer-->
-<footer class="footerBg">
-    <div class="mx-auto w-full max-w-screen-xl p-4 py-6 lg:py-8">
-        <div class="md:flex md:justify-between">
-            <div class="mb-6 md:mb-0">
-                <a class="flex items-center">
-                    <img th:src="@{/images/pruebaEstres.png}" class="h-7 me-3" alt="FlowBite Logo" />
-                    <span class="text-heading self-center text-2xl font-semibold whitespace-nowrap">CureStress</span>
-                </a>
-            </div>
-            <div class="grid grid-cols-2 gap-8 sm:gap-6 sm:grid-cols-3">
-                <div>
-                    <h2 class="mb-6 text-sm font-semibold text-heading uppercase">Índice</h2>
-                    <ul class="text-body font-medium">
-                        <li class="mb-4">
-                            <a th:href="@{/inicio}" class="hover:underline">Inicio</a>
-                        </li>
-                        <li class="mb-4">
-                            <a th:href="@{/usuarios}" class="hover:underline">Tabla usuarios</a>
-                        </li>
-                        <li class="mb-4">
-                            <a th:href="@{/usuarios/formUsuario}" class="hover:underline">Formulario</a>
-                        </li>
-                    </ul>
-                </div>
-                <div>
-                    <h2 class="mb-6 text-sm font-semibold text-heading uppercase">Siguenos</h2>
-                    <ul class="text-body font-medium">
-                        <li class="mb-4">
-                            <a target="_blank" href="https://www.instagram.com/" class="hover:underline ">Instagram</a>
-                        </li>
-                        <li class="mb-4">
-                            <a target="_blank" href="https://www.youtube.com/" class="hover:underline">YouTube</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
+        
+        <!-- Footer -->
         <hr class="my-6 border-default sm:mx-auto lg:my-8" />
         <div class="sm:flex sm:items-center sm:justify-between">
           <span class="text-sm text-body sm:text-center">© 2025 <a class="hover:underline">CureStress™</a>. All Rights Reserved.
@@ -133,8 +153,9 @@
                 </a>
             </div>
         </div>
-    </div>
-</footer>
-<script th:src="@{/js/index.js}"></script>
+        </div>
+    </form>
+</div>
+
 </body>
 </html>

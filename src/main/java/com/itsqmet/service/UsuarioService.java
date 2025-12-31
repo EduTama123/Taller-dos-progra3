@@ -5,6 +5,7 @@ import com.itsqmet.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UsuarioService {
@@ -17,6 +18,11 @@ public class UsuarioService {
         return usuarioRepository.findAll();
     }
 
+    // BUSCAR USUARIO POR ID (alias para compatibilidad)
+    public Usuario findById(Long id) {
+        return buscarUsuarioById(id);
+    }
+
     // BUSCAR USUARIO POR ID
     public Usuario buscarUsuarioById(Long id) {
         return usuarioRepository.findById(id)
@@ -24,7 +30,7 @@ public class UsuarioService {
     }
 
     // BUSCAR USUARIO POR CEDULA
-    public Usuario buscarPorCedula(String cedula) {
+    public Optional<Usuario> buscarPorCedula(String cedula) {
         return usuarioRepository.findByCedula(cedula);
     }
 
@@ -53,7 +59,7 @@ public class UsuarioService {
     }
 
     // OBTENER USUARIO POR CUENTA
-    public Usuario obtenerPorCuentaId(Long accountId) {
+    public Optional<Usuario> obtenerPorCuentaId(Long accountId) {
         return usuarioRepository.findByAccountId(accountId);
     }
 }

@@ -7,10 +7,6 @@ import java.util.Optional;
 
 @Repository
 public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
-
-    // BUSCAR USUARIO POR CEDULA EXACTA
-    Usuario findByCedula(String cedula);
-
-    // BUSCAR USUARIO POR ID DE CUENTA ASOCIADA
-    Usuario findByAccountId(Long accountId);
+    Optional<Usuario> findByCedula(String cedula);
+    Optional<Usuario> findByAccountId(Long accountId);
 }
