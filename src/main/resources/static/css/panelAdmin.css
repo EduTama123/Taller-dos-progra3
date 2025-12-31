@@ -1,6 +1,6 @@
 .admin-panel {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: white;
+    background: linear-gradient(135deg, #f0fff4 0%, #e6f7f0 50%, #f0fff4 100%);
     min-height: calc(100vh - 200px);
     padding: 40px 20px;
 }
@@ -34,10 +34,15 @@
 }
 
 .admin-subtitle {
-    color: #6b7280;
+    color: #4b5563;
     font-size: 18px;
     max-width: 600px;
     margin: 0 auto;
+    background: rgba(255, 255, 255, 0.6);
+    padding: 12px 20px;
+    border-radius: 10px;
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(95, 165, 138, 0.1);
 }
 
 /*secciones*/
@@ -48,20 +53,29 @@
 
 /*secciones panel*/
 .admin-section {
-    border: 1px solid #e5e7eb;
-    background: white;
+    border: 1px solid rgba(95, 165, 138, 0.15);
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     transition: all 0.3s ease;
-    border-radius: 12px;
+    border-radius: 16px;
     overflow: hidden;
     height: 100%;
     display: flex;
     flex-direction: column;
+    box-shadow:
+        0 8px 25px rgba(95, 165, 138, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
 .admin-section:hover {
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    box-shadow:
+        0 15px 40px rgba(95, 165, 138, 0.15),
+        0 5px 20px rgba(0, 0, 0, 0.05),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
     transform: translateY(-5px);
-    border-color: #c6e6d8;
+    border-color: rgba(95, 165, 138, 0.3);
+    background: rgba(255, 255, 255, 0.9);
 }
 
 /*titulos centrados*/
@@ -89,11 +103,20 @@
     font-size: 14px;
     color: #6b7280;
     margin-bottom: 24px;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 8px;
+    border: 1px solid rgba(95, 165, 138, 0.05);
 }
 
 /*botones*/
 .action-buttons {
     margin-top: auto;
+    background: rgba(255, 255, 255, 0.4);
+    padding: 20px;
+    margin: 20px -20px -20px -20px;
+    border-top: 1px solid rgba(95, 165, 138, 0.1);
+    border-radius: 0 0 16px 16px;
 }
 
 .btn {
@@ -104,17 +127,18 @@
     align-items: center;
     justify-content: center;
     padding: 12px 20px;
-    border-radius: 8px;
+    border-radius: 10px;
     transition: all 0.3s ease;
     border: none;
     cursor: pointer;
     text-decoration: none;
     min-height: 50px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
 .btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
 .btn-icon {
@@ -167,6 +191,7 @@
 
 .admin-section {
     animation: fadeInUp 0.5s ease forwards;
+    padding: 20px;
 }
 
 .admin-section:nth-child(1) {
@@ -184,7 +209,8 @@
 
     .admin-subtitle {
         font-size: 16px;
-        padding: 0 20px;
+        padding: 10px 15px;
+        margin: 0 10px;
     }
 
     .section-title {
@@ -207,12 +233,13 @@
 }
 
 @media (max-width: 480px) {
-    .admin-title {
-        font-size: 24px;
-    }
-
     .admin-panel {
         padding: 20px 10px;
+        background: linear-gradient(135deg, #f5fbf8 0%, #f0fff4 100%);
+    }
+
+    .admin-title {
+        font-size: 24px;
     }
 
     .section-title {
@@ -221,6 +248,7 @@
 
     .admin-subtitle {
         font-size: 15px;
+        padding: 8px 12px;
     }
 }
 
@@ -237,6 +265,7 @@
     opacity: 0;
     transition: opacity 0.3s ease;
     animation: gradientShift 3s ease infinite;
+    border-radius: 16px 16px 0 0;
 }
 
 .admin-section:hover::before {
