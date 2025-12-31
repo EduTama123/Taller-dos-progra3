@@ -7,8 +7,8 @@ import com.itsqmet.entity.Usuario;
 import com.itsqmet.service.RecomendacionService;
 import com.itsqmet.service.TestService;
 import com.itsqmet.service.UsuarioService;
-import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -26,10 +26,10 @@ public class EspecialistaController {
     @Autowired
     private RecomendacionService recomendacionService;
 
-    // PANEL PRINCIPAL DEL ESPECIALISTA
+    // PANEL PRINCIPAL DEL ESPECIALISTA - CORREGIDO
     @GetMapping("/panel")
-    public String panelEspecialista(HttpSession session, Model model) {
-        if (!verificarSesionEspecialista(session)) {
+    public String panelEspecialista(Authentication authentication, Model model) {
+        if (!verificarAutenticacionEspecialista(authentication)) {
             return "redirect:/login";
         }
         return "pages/panelEspecialista";
@@ -37,7 +37,10 @@ public class EspecialistaController {
 
     // LISTA DE TODOS LOS USUARIOS
     @GetMapping("/usuarios")
-    public String listaUsuarios(Model model) {
+    public String listaUsuarios(Authentication authentication, Model model) {
+        if (!verificarAutenticacionEspecialista(authentication)) {
+            return "redirect:/login";
+        }
         var usuarios = usuarioService.mostrarUsuarios();
         model.addAttribute("usuarios", usuarios);
         return "pages/listaUsuarios";
@@ -47,7 +50,12 @@ public class EspecialistaController {
     @GetMapping("/historial/{usuarioId}")
     public String verHistorialUsuario(
             @PathVariable Long usuarioId,
+            Authentication authentication,
             Model model) {
+
+        if (!verificarAutenticacionEspecialista(authentication)) {
+            return "redirect:/login";
+        }
 
         Usuario usuario = usuarioService.buscarUsuarioById(usuarioId);
         var tests = testService.obtenerTestsPorUsuario(usuarioId);
@@ -61,11 +69,14 @@ public class EspecialistaController {
     @GetMapping("/recomendacion/{testId}")
     public String formRecomendacion(
             @PathVariable Long testId,
+            Authentication authentication,
             Model model) {
 
-        TestAnsiedad test = testService.buscarTestById(testId);
+        if (!verificarAutenticacionEspecialista(authentication)) {
+            return "redirect:/login";
+        }
 
-        // BUSCAR SI YA EXISTE RECOMENDACION PARA ESE NIVEL
+        TestAnsiedad test = testService.buscarTestById(testId);
         Recomendacion recomendacion = recomendacionService
                 .buscarPorNivelAnsiedad(test.getNivelAnsiedad());
 
@@ -83,11 +94,14 @@ public class EspecialistaController {
     @PostMapping("/recomendacion/{testId}")
     public String guardarRecomendacion(
             @PathVariable Long testId,
-            @ModelAttribute Recomendacion recomendacionForm) {
+            @ModelAttribute Recomendacion recomendacionForm,
+            Authentication authentication) {
+
+        if (!verificarAutenticacionEspecialista(authentication)) {
+            return "redirect:/login";
+        }
 
         TestAnsiedad test = testService.buscarTestById(testId);
-
-        // BUSCAR O CREAR RECOMENDACION
         Recomendacion recomendacion = recomendacionService
                 .buscarPorNivelAnsiedad(test.getNivelAnsiedad());
 
@@ -96,7 +110,6 @@ public class EspecialistaController {
             recomendacion.setNivelAnsiedad(test.getNivelAnsiedad());
         }
 
-        // ACTUALIZAR RECOMENDACIONES
         recomendacion.setRecomendacion1(recomendacionForm.getRecomendacion1());
         recomendacion.setRecomendacion2(recomendacionForm.getRecomendacion2());
         recomendacion.setRecomendacion3(recomendacionForm.getRecomendacion3());
@@ -106,16 +119,20 @@ public class EspecialistaController {
         Recomendacion recomendacionGuardada = recomendacionService
                 .guardarRecomendacion(recomendacion);
 
-        // ASIGNAR RECOMENDACION AL TEST
         test.setRecomendacion(recomendacionGuardada);
         testService.guardarTest(test);
 
         return "redirect:/especialista/historial/" + test.getUsuario().getId();
     }
 
-    // METODO AUXILIAR PARA VERIFICAR SESION
-    private boolean verificarSesionEspecialista(HttpSession session) {
-        Account account = (Account) session.getAttribute("account");
-        return account != null && account.getRol().name().equals("ROLE_ESPECIALISTA");
+    // METODO PARA VERIFICAR AUTENTIFICACION
+    private boolean verificarAutenticacionEspecialista(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return false;
+        }
+
+        return authentication.getAuthorities().stream()
+                .anyMatch(grantedAuthority ->
+                        grantedAuthority.getAuthority().equals("ROLE_ESPECIALISTA"));
     }
 }

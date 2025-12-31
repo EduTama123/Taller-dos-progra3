@@ -7,6 +7,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Controller
 @RequestMapping("/test")
 public class TestController {
@@ -19,14 +22,34 @@ public class TestController {
     public String listaTests(Model model) {
         var tests = testService.mostrarTests();
         model.addAttribute("tests", tests);
+
+        // Calcular usuarios únicos en el controlador
+        Set<Long> usuariosUnicos = new HashSet<>();
+        for (TestAnsiedad test : tests) {
+            if (test.getUsuario() != null && test.getUsuario().getId() != null) {
+                usuariosUnicos.add(test.getUsuario().getId());
+            }
+        }
+
+        model.addAttribute("totalUsuarios", usuariosUnicos.size());
         return "pages/testList";
     }
 
-    // VER TESTS SIN RECOMENDACION (PARA ESPECIALISTA)
+    // VER TESTS SIN RECOMENDACION (PARA ESPECIALISTA) - CORREGIDO
     @GetMapping("/sin-recomendacion")
     public String testsSinRecomendacion(Model model) {
         var tests = testService.obtenerTestsSinRecomendacion();
         model.addAttribute("tests", tests);
+
+        // Calcular usuarios únicos
+        Set<Long> usuariosUnicos = new HashSet<>();
+        for (TestAnsiedad test : tests) {
+            if (test.getUsuario() != null && test.getUsuario().getId() != null) {
+                usuariosUnicos.add(test.getUsuario().getId());
+            }
+        }
+
+        model.addAttribute("totalUsuarios", usuariosUnicos.size());
         return "pages/testList";
     }
 

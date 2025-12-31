@@ -5,7 +5,7 @@
     <title>Mi Historial - CureStress</title>
     <!-- FAVICON -->
     <link rel="icon" th:href="@{/images/pruebaEstres.png}">
-    <link href="https://cdn.jsdelivr.net/npm/flowbite@4.0.1/dist/flowbite.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/flowbite@4.0.1/dist/flowbite.min.css" rel="stylesheet"/>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" th:href="@{/css/styles.css}">
     <link rel="stylesheet" th:href="@{/css/estilosTabla.css}">
@@ -17,14 +17,14 @@
     <nav class="navbar-top">
         <div class="flex flex-wrap justify-between items-center mx-auto max-w-screen-xl p-4">
             <a th:href="@{/usuario/panel}" class="logo flex items-center space-x-3 rtl:space-x-reverse">
-                <img th:src="@{images/pruebaEstres.png}" class="h-7" alt="CureStress Logo" />
+                <img th:src="@{images/pruebaEstres.png}" class="h-7" alt="CureStress Logo"/>
                 <span class="self-center text-xl font-semibold whitespace-nowrap">CureStress</span>
             </a>
             <div class="flex items-center space-x-4">
-        <span class="text-white font-medium">
-          <span th:text="${usuario.nombre}"></span>
-          <span th:text="${usuario.apellido}"></span>
-        </span>
+                <span class="text-white font-medium">
+                    <span th:text="${usuario.nombre}"></span>
+                    <span th:text="${usuario.apellido}"></span>
+                </span>
                 <form th:action="@{/logout}" method="post">
                     <button type="submit"
                             class="rounded-md bg-gray-600 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700">
@@ -67,9 +67,9 @@
             <div class="bg-green-50 p-4 rounded-lg">
                 <p class="text-sm text-green-600 font-medium">Promedio Puntuación</p>
                 <p class="text-2xl font-bold text-green-700">
-          <span th:if="${#lists.size(tests) > 0}">
-            <span th:text="${#numbers.formatDecimal(T(java.lang.Double).parseDouble(#aggregates.sum(tests.![puntuacionTotal])/#lists.size(tests)), 1, 1)}">0.0</span>
-          </span>
+                    <span th:if="${#lists.size(tests) > 0}">
+                        <span th:text="${#numbers.formatDecimal(T(java.lang.Double).parseDouble(#aggregates.sum(tests.![puntuacionTotal])/#lists.size(tests)), 1, 1)}">0.0</span>
+                    </span>
                     <span th:if="${#lists.size(tests) == 0}">0.0</span>
                 </p>
             </div>
@@ -88,7 +88,9 @@
         <div class="flex">
             <div class="flex-shrink-0">
                 <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                    <path fill-rule="evenodd"
+                          d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                          clip-rule="evenodd"/>
                 </svg>
             </div>
             <div class="ml-3">
@@ -99,7 +101,7 @@
         </div>
     </div>
 
-    <!-- TABLA DE TESTS -->
+    <!-- TABLA DE TESTS (SIMPLIFICADA) -->
     <div class="bg-white shadow-md rounded-lg overflow-hidden">
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
@@ -117,74 +119,89 @@
                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Recomendación
                     </th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Detalles
-                    </th>
                 </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
-                <tr th:each="test, iterStat : ${tests}" th:classappend="${iterStat.odd} ? 'bg-gray-50' : 'bg-white'">
+                <tr th:each="test : ${tests}">
                     <!-- FECHA -->
                     <td class="px-6 py-4 whitespace-nowrap">
                         <div class="text-sm text-gray-900" th:text="${#temporals.format(test.fechaRealizacion, 'dd/MM/yyyy HH:mm')}"></div>
-                        <div class="text-sm text-gray-500" th:text="${#temporals.format(test.fechaRealizacion, 'EEEE')}"></div>
                     </td>
 
-                    <!-- PUNTUACIÓN -->
+                    <!-- PUNTUACIÓN (SIMPLIFICADA) -->
                     <td class="px-6 py-4 whitespace-nowrap">
                         <div class="text-center">
-                <span class="px-3 py-1 text-sm font-semibold rounded-full"
-                      th:classappend="${test.puntuacionTotal <= 15} ? 'bg-green-100 text-green-800' :
-                                     ${test.puntuacionTotal <= 30} ? 'bg-blue-100 text-blue-800' :
-                                     ${test.puntuacionTotal <= 45} ? 'bg-yellow-100 text-yellow-800' :
-                                     ${test.puntuacionTotal <= 60} ? 'bg-orange-100 text-orange-800' :
-                                     'bg-red-100 text-red-800'">
-                  <span th:text="${test.puntuacionTotal}"></span> pts
-                </span>
+                            <span th:if="${test.puntuacionTotal <= 15}"
+                                  class="px-3 py-1 text-sm font-semibold rounded-full bg-green-100 text-green-800">
+                                <span th:text="${test.puntuacionTotal}"></span> pts
+                            </span>
+                            <span th:if="${test.puntuacionTotal > 15 and test.puntuacionTotal <= 30}"
+                                  class="px-3 py-1 text-sm font-semibold rounded-full bg-blue-100 text-blue-800">
+                                <span th:text="${test.puntuacionTotal}"></span> pts
+                            </span>
+                            <span th:if="${test.puntuacionTotal > 30 and test.puntuacionTotal <= 45}"
+                                  class="px-3 py-1 text-sm font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                <span th:text="${test.puntuacionTotal}"></span> pts
+                            </span>
+                            <span th:if="${test.puntuacionTotal > 45 and test.puntuacionTotal <= 60}"
+                                  class="px-3 py-1 text-sm font-semibold rounded-full bg-orange-100 text-orange-800">
+                                <span th:text="${test.puntuacionTotal}"></span> pts
+                            </span>
+                            <span th:if="${test.puntuacionTotal > 60}"
+                                  class="px-3 py-1 text-sm font-semibold rounded-full bg-red-100 text-red-800">
+                                <span th:text="${test.puntuacionTotal}"></span> pts
+                            </span>
                         </div>
                     </td>
 
-                    <!-- NIVEL DE ANSIEDAD -->
+                    <!-- NIVEL DE ANSIEDAD (SIMPLIFICADA) -->
                     <td class="px-6 py-4 whitespace-nowrap">
-              <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full"
-                    th:classappend="${test.nivelAnsiedad == 'Mínima'} ? 'bg-green-100 text-green-800' :
-                                   ${test.nivelAnsiedad == 'Leve'} ? 'bg-blue-100 text-blue-800' :
-                                   ${test.nivelAnsiedad == 'Moderada'} ? 'bg-yellow-100 text-yellow-800' :
-                                   ${test.nivelAnsiedad == 'Grave'} ? 'bg-orange-100 text-orange-800' :
-                                   'bg-red-100 text-red-800'">
-                <span th:text="${test.nivelAnsiedad}"></span>
-              </span>
+                        <span th:if="${test.nivelAnsiedad == 'Mínima'}"
+                              class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                            <span th:text="${test.nivelAnsiedad}"></span>
+                        </span>
+                        <span th:if="${test.nivelAnsiedad == 'Leve'}"
+                              class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                            <span th:text="${test.nivelAnsiedad}"></span>
+                        </span>
+                        <span th:if="${test.nivelAnsiedad == 'Moderada'}"
+                              class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                            <span th:text="${test.nivelAnsiedad}"></span>
+                        </span>
+                        <span th:if="${test.nivelAnsiedad == 'Grave'}"
+                              class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-orange-100 text-orange-800">
+                            <span th:text="${test.nivelAnsiedad}"></span>
+                        </span>
+                        <span th:if="${test.nivelAnsiedad != null and test.nivelAnsiedad != 'Mínima' and test.nivelAnsiedad != 'Leve' and test.nivelAnsiedad != 'Moderada' and test.nivelAnsiedad != 'Grave'}"
+                              class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                            <span th:text="${test.nivelAnsiedad}"></span>
+                        </span>
                     </td>
 
-                    <!-- RECOMENDACIÓN -->
+                    <!-- RECOMENDACIÓN (SIMPLIFICADA) -->
                     <td class="px-6 py-4 whitespace-nowrap">
-                        <div th:if="${test.recomendacion != null}" class="flex items-center">
-                            <svg class="h-5 w-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        <div class="flex items-center">
+                            <svg class="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path th:if="${test.recomendacion != null}" fill-rule="evenodd"
+                                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                      clip-rule="evenodd"/>
+                                <path th:unless="${test.recomendacion != null}" fill-rule="evenodd"
+                                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z"
+                                      clip-rule="evenodd"/>
                             </svg>
-                            <span class="text-sm text-green-600 font-medium">Disponible</span>
+                            <span th:if="${test.recomendacion != null}"
+                                  class="text-sm text-green-600 font-medium">Disponible</span>
+                            <span th:unless="${test.recomendacion != null}"
+                                  class="text-sm text-gray-500">Pendiente</span>
                         </div>
-                        <div th:unless="${test.recomendacion != null}" class="flex items-center">
-                            <svg class="h-5 w-5 text-gray-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd"/>
-                            </svg>
-                            <span class="text-sm text-gray-500">Pendiente</span>
-                        </div>
-                    </td>
-
-                    <!-- DETALLES -->
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <a th:href="@{/test/detalle/}+${test.id}"
-                           class="text-blue-600 hover:text-blue-900">
-                            Ver Detalles
-                        </a>
                     </td>
                 </tr>
 
                 <!-- MENSAJE SI NO HAY TESTS -->
                 <tr th:if="${#lists.isEmpty(tests)}">
-                    <td colspan="5" class="px-6 py-12 text-center">
-                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <td colspan="4" class="px-6 py-12 text-center">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor"
+                             viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                         </svg>
@@ -209,20 +226,13 @@
             <a th:href="@{/usuario/panel}"
                class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                 <svg class="mr-2 h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                 </svg>
                 Volver al Panel
             </a>
         </div>
         <div class="space-x-3">
-            <a th:href="@{/recomendaciones}"
-               class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-                <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                Ver Recomendaciones
-            </a>
             <a th:href="@{/usuario/test}"
                class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                 <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -241,7 +251,7 @@
         <div class="md:flex md:justify-between">
             <div class="mb-6 md:mb-0">
                 <a th:href="@{/usuario/panel}" class="flex items-center">
-                    <img th:src="@{images/pruebaEstres.png}" class="h-7 me-3" alt="CureStress Logo" />
+                    <img th:src="@{images/pruebaEstres.png}" class="h-7 me-3" alt="CureStress Logo"/>
                     <span class="text-heading self-center text-2xl font-semibold whitespace-nowrap">CureStress</span>
                 </a>
             </div>
@@ -266,12 +276,6 @@
                         <li class="mb-4">
                             <a th:href="@{/usuario/datos}" class="hover:underline">Mis Datos</a>
                         </li>
-                        <li class="mb-4">
-                            <a th:href="@{/recomendaciones}" class="hover:underline">Recomendaciones</a>
-                        </li>
-                        <li class="mb-4">
-                            <a th:href="@{/test}" class="hover:underline">Todos los Tests</a>
-                        </li>
                     </ul>
                 </div>
                 <div>
@@ -287,16 +291,19 @@
                 </div>
             </div>
         </div>
-        <hr class="my-6 border-default sm:mx-auto lg:my-8" />
+        <hr class="my-6 border-default sm:mx-auto lg:my-8"/>
         <div class="sm:flex sm:items-center sm:justify-between">
-      <span class="text-sm text-body sm:text-center">
-        © 2025 <a class="hover:underline">CureStress™</a>. Todos los derechos reservados.
-      </span>
+            <span class="text-sm text-body sm:text-center">
+                © 2025 <a class="hover:underline">CureStress™</a>. Todos los derechos reservados.
+            </span>
             <div class="flex mt-4 sm:justify-center sm:mt-0">
-                <a target="_blank" th:href="@{https://github.com/EduTama123/Taller-dos-progra3.git}"
+                <a target="_blank" th:href="@{https://github.com/EduTama123/Taller-Uno-Progra3.git}"
                    class="text-body hover:text-heading ms-5">
-                    <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                        <path fill-rule="evenodd" d="M12.006 2a9.847 9.847 0 0 0-6.484 2.44 10.32 10.32 0 0 0-3.393 6.17 10.48 10.48 0 0 0 1.317 6.955 10.045 10.045 0 0 0 5.4 4.418c.504.095.683-.223.683-.494 0-.245-.01-1.052-.014-1.908-2.78.62-3.366-1.21-3.366-1.21a2.711 2.711 0 0 0-1.11-1.5c-.907-.637.07-.621.07-.621.317.044.62.163.885.346.266.183.487.426.647.71.135.253.318.476.538.655a2.079 2.079 0 0 0 2.37.196c.045-.52.27-1.006.635-1.37-2.219-.259-4.554-1.138-4.554-5.07a4.022 4.022 0 0 1 1.031-2.75 3.77 3.77 0 0 1 .096-2.713s.839-.275 2.749 1.05a9.26 9.26 0 0 1 5.004 0c1.906-1.325 2.74-1.05 2.74-1.05.37.858.406 1.828.101 2.713a4.017 4.017 0 0 1 1.029 2.75c0 3.939-2.339 4.805-4.564 5.058a2.471 2.471 0 0 1 .679 1.897c0 1.372-.012 2.477-.012 2.814 0 .272.18.592.687.492a10.05 10.05 0 0 0 5.388-4.421 10.473 10.473 0 0 0 1.313-6.948 10.32 10.32 0 0 0-3.39-6.165A9.847 9.847 0 0 0 12.007 2Z" clip-rule="evenodd"/>
+                    <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                         fill="currentColor" viewBox="0 0 24 24">
+                        <path fill-rule="evenodd"
+                              d="M12.006 2a9.847 9.847 0 0 0-6.484 2.44 10.32 10.32 0 0 0-3.393 6.17 10.48 10.48 0 0 0 1.317 6.955 10.045 10.045 0 0 0 5.4 4.418c.504.095.683-.223.683-.494 0-.245-.01-1.052-.014-1.908-2.78.62-3.366-1.21-3.366-1.21a2.711 2.711 0 0 0-1.11-1.5c-.907-.637.07-.621.07-.621.317.044.62.163.885.346.266.183.487.426.647.71.135.253.318.476.538.655a2.079 2.079 0 0 0 2.37.196c.045-.52.27-1.006.635-1.37-2.219-.259-4.554-1.138-4.554-5.07a4.022 4.022 0 0 1 1.031-2.75 3.77 3.77 0 0 1 .096-2.713s.839-.275 2.749 1.05a9.26 9.26 0 0 1 5.004 0c1.906-1.325 2.74-1.05 2.74-1.05.37.858.406 1.828.101 2.713a4.017 4.017 0 0 1 1.029 2.75c0 3.939-2.339 4.805-4.564 5.058a2.471 2.471 0 0 1 .679 1.897c0 1.372-.012 2.477-.012 2.814 0 .272.18.592.687.492a10.05 10.05 0 0 0 5.388-4.421 10.473 10.473 0 0 0 1.313-6.948 10.32 10.32 0 0 0-3.39-6.165A9.847 9.847 0 0 0 12.007 2Z"
+                              clip-rule="evenodd"/>
                     </svg>
                     <span class="sr-only">Enlace repo</span>
                 </a>

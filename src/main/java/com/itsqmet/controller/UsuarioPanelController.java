@@ -6,7 +6,6 @@ import com.itsqmet.entity.Usuario;
 import com.itsqmet.service.AccountService;
 import com.itsqmet.service.TestService;
 import com.itsqmet.service.UsuarioService;
-import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -14,6 +13,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.List;
 
 @Controller
 @RequestMapping("/usuario")
@@ -28,98 +30,115 @@ public class UsuarioPanelController {
     @Autowired
     private TestService testService;
 
-    // PANEL PRINCIPAL DEL USUARIO
     @GetMapping("/panel")
     public String panelUsuario(Authentication authentication, Model model) {
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return "redirect:/login";
+        if (!verificarAutenticacionUsuario(authentication)) {
+            return "redirect:/login?error=No autorizado";
         }
 
-        // Obtener username desde Authentication (como en tu código base)
         String username = authentication.getName();
-
-        // Buscar cuenta por username
         Account account = accountService.buscarPorUsername(username)
                 .orElseThrow(() -> new RuntimeException("CUENTA NO ENCONTRADA"));
-
-        // Obtener usuario relacionado
         Usuario usuario = accountService.obtenerUsuarioDeCuenta(account);
+        Long cantidadTests = testService.contarTestsPorUsuario(usuario.getId());
 
         model.addAttribute("usuario", usuario);
+        model.addAttribute("cantidadTests", cantidadTests);
+
         return "pages/panelUsuario";
     }
 
-    // FORMULARIO PARA REALIZAR TEST
     @GetMapping("/test")
-    public String realizarTest(HttpSession session, Model model) {
-        Account account = obtenerCuentaDeSesion(session);
-        if (account == null) return "redirect:/login";
+    public String realizarTest(Authentication authentication, Model model) {
+        if (!verificarAutenticacionUsuario(authentication)) {
+            return "redirect:/login";
+        }
 
-        model.addAttribute("test", new TestAnsiedad());
+        TestAnsiedad testAnsiedad = new TestAnsiedad();
+        model.addAttribute("testAnsiedad", testAnsiedad);
         return "pages/testForm";
     }
 
-    // GUARDAR TEST REALIZADO
     @PostMapping("/test")
     public String guardarTest(
-            @ModelAttribute TestAnsiedad test,
-            HttpSession session) {
+            @ModelAttribute("testAnsiedad") TestAnsiedad testAnsiedad,
+            Authentication authentication,
+            RedirectAttributes redirectAttributes) {
 
-        Account account = obtenerCuentaDeSesion(session);
-        if (account == null) return "redirect:/login";
+        if (!verificarAutenticacionUsuario(authentication)) {
+            return "redirect:/login";
+        }
 
-        // OBTENER USUARIO Y ASOCIAR AL TEST
+        String username = authentication.getName();
+        Account account = accountService.buscarPorUsername(username)
+                .orElseThrow(() -> new RuntimeException("Cuenta no encontrada"));
         Usuario usuario = accountService.obtenerUsuarioDeCuenta(account);
-        test.setUsuario(usuario);
 
-        // GUARDAR TEST
-        testService.guardarTest(test);
+        testAnsiedad.setUsuario(usuario);
+        testAnsiedad.calcularResultados();
+        testService.guardarTest(testAnsiedad);
 
+        redirectAttributes.addFlashAttribute("mensajeExito", "Test completado exitosamente!");
         return "redirect:/usuario/historial";
     }
 
-    // VER HISTORIAL DE TESTS DEL USUARIO
     @GetMapping("/historial")
-    public String verHistorial(HttpSession session, Model model) {
-        Account account = obtenerCuentaDeSesion(session);
-        if (account == null) return "redirect:/login";
+    public String verHistorial(Authentication authentication, Model model) {
+        if (!verificarAutenticacionUsuario(authentication)) {
+            return "redirect:/login";
+        }
 
+        String username = authentication.getName();
+        Account account = accountService.buscarPorUsername(username)
+                .orElseThrow(() -> new RuntimeException("Cuenta no encontrada"));
         Usuario usuario = accountService.obtenerUsuarioDeCuenta(account);
-        var tests = testService.obtenerTestsPorUsuario(usuario);
+        List<TestAnsiedad> tests = testService.obtenerTestsPorUsuario(usuario);
 
+        model.addAttribute("usuario", usuario);
         model.addAttribute("tests", tests);
+
         return "pages/historialUsuario";
     }
 
-    // VER DATOS PERSONALES
     @GetMapping("/datos")
-    public String verDatosPersonales(HttpSession session, Model model) {
-        Account account = obtenerCuentaDeSesion(session);
-        if (account == null) return "redirect:/login";
+    public String verDatosPersonales(Authentication authentication, Model model) {
+        if (!verificarAutenticacionUsuario(authentication)) {
+            return "redirect:/login";
+        }
 
+        String username = authentication.getName();
+        Account account = accountService.buscarPorUsername(username)
+                .orElseThrow(() -> new RuntimeException("Cuenta no encontrada"));
         Usuario usuario = accountService.obtenerUsuarioDeCuenta(account);
+
+        // Pasar la cuenta asociada al modelo
         model.addAttribute("usuario", usuario);
-        return "pages/usuarioForm";
+        model.addAttribute("cuentaAsociada", account); // Para mostrar en el formulario
+
+        return "pages/usuarioForm"; // Mismo formulario pero con datos precargados
     }
 
-    // ACTUALIZAR DATOS PERSONALES
     @PostMapping("/datos")
     public String guardarDatosPersonales(
             @Valid @ModelAttribute Usuario usuarioForm,
             BindingResult result,
-            HttpSession session,
+            Authentication authentication,
             Model model) {
 
-        Account account = obtenerCuentaDeSesion(session);
-        if (account == null) return "redirect:/login";
+        if (!verificarAutenticacionUsuario(authentication)) {
+            return "redirect:/login";
+        }
 
         if (result.hasErrors()) {
             model.addAttribute("usuario", usuarioForm);
             return "pages/usuarioForm";
         }
 
-        // OBTENER USUARIO ACTUAL Y ACTUALIZAR DATOS
+        String username = authentication.getName();
+        Account account = accountService.buscarPorUsername(username)
+                .orElseThrow(() -> new RuntimeException("Cuenta no encontrada"));
         Usuario usuario = accountService.obtenerUsuarioDeCuenta(account);
+
         usuario.setNombre(usuarioForm.getNombre());
         usuario.setApellido(usuarioForm.getApellido());
         usuario.setCedula(usuarioForm.getCedula());
@@ -131,12 +150,13 @@ public class UsuarioPanelController {
         return "redirect:/usuario/panel";
     }
 
-    // METODO AUXILIAR PARA OBTENER CUENTA DE SESION
-    private Account obtenerCuentaDeSesion(HttpSession session) {
-        Account account = (Account) session.getAttribute("account");
-        if (account == null || !account.getRol().name().equals("ROLE_USUARIO")) {
-            return null;
+    private boolean verificarAutenticacionUsuario(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return false;
         }
-        return account;
+
+        return authentication.getAuthorities().stream()
+                .anyMatch(grantedAuthority ->
+                        grantedAuthority.getAuthority().equals("ROLE_USUARIO"));
     }
 }

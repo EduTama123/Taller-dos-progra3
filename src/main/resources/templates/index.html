@@ -32,7 +32,7 @@
                     <li><a th:href="@{/usuarios/formUsuario}" class="nav-link">Formulario</a></li>
                     <li><a th:href="@{/test}" class="nav-link">Historial de test</a></li>
                     <li><a th:href="@{/test/formTest}" class="nav-link">Test</a></li>
-                    <li><a th:href="@{/cuentas/formCuenta}" class="nav-link">Crear cuenta</a></li>
+                    <li><a th:href="@{/auth/registro}" class="nav-link">Crear cuenta</a></li>
                     <li><a th:href="@{/login}" class="nav-link">Iniciar sesión</a></li>
                 </ul>
             </div>
@@ -250,7 +250,7 @@
         <p class="textos hiddenParagraph">
             ¿Quieres realizar un test? Presiona el botón y empieza un test de ansiedad ahora.
         </p>
-        <a id="contactButton" th:href="@{/usuarios/formUsuario}">Comenzar test</a>
+        <a id="contactButton" th:href="@{/usuario/test}">Comenzar test</a>
     </section>
 </main>
 

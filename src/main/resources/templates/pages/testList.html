@@ -100,7 +100,7 @@
             <div class="bg-purple-50 p-3 rounded-lg text-center">
                 <p class="text-sm text-purple-600">Usuarios</p>
                 <p class="text-xl font-bold text-purple-700">
-                    <span th:text="${#lists.size(#sets.create(tests.![usuario.id]))}">0</span>
+                    <span th:text="${totalUsuarios}"></span>
                 </p>
             </div>
         </div>
