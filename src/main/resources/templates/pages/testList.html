@@ -2,111 +2,306 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Historial de Tests</title>
-    <!--FAVICON-->
+    <title>Historial de Tests - CureStress</title>
+    <!-- FAVICON -->
     <link rel="icon" th:href="@{/images/pruebaEstres.png}">
     <link href="https://cdn.jsdelivr.net/npm/flowbite@4.0.1/dist/flowbite.min.css" rel="stylesheet" />
-    <script src="https://cdn.jsdelivr.net/npm/flowbite@4.0.1/dist/flowbite.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" th:href="@{/css/styles.css}">
     <link rel="stylesheet" th:href="@{/css/estilosTabla.css}">
 </head>
 <body>
+<!-- BARRA DE NAVEGACION (DEPENDE DEL ROL) -->
 <header class="sticky w-full top-0 z-50">
-    <!-- Primer nav -->
+    <!-- PRIMER NAV -->
     <nav class="navbar-top">
         <div class="flex flex-wrap justify-between items-center mx-auto max-w-screen-xl p-4">
-            <a class="logo flex items-center space-x-3 rtl:space-x-reverse">
-                <img th:src="@{/images/pruebaEstres.png}" class="h-7" alt="CureStress Logo" />
+            <a th:href="@{/}" class="logo flex items-center space-x-3 rtl:space-x-reverse">
+                <img th:src="@{images/pruebaEstres.png}" class="h-7" alt="CureStress Logo" />
                 <span class="self-center text-xl font-semibold whitespace-nowrap">CureStress</span>
             </a>
+            <!-- CONTROL DINÁMICO SEGÚN ROL (COMO EN CLASE) -->
+            <div class="flex items-center space-x-4" th:if="${session.account != null}">
+                <span class="text-white font-medium" th:text="${session.account.nombre}"></span>
+                <form th:action="@{/logout}" method="post">
+                    <button type="submit"
+                            class="rounded-md bg-gray-600 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700">
+                        Cerrar sesión
+                    </button>
+                </form>
+            </div>
         </div>
     </nav>
 
-    <!-- Segundo nav -->
+    <!-- SEGUNDO NAV -->
     <nav class="navbar-bottom">
         <div class="max-w-screen-xl px-4 py-3 mx-auto">
             <div class="flex items-center justify-center">
                 <ul class="flex flex-row font-medium mt-0 space-x-8 rtl:space-x-reverse text-sm">
-                    <li><a th:href="@{/inicio}" class="nav-link" aria-current="page">Home</a></li>
-                    <li><a th:href="@{/usuarios}" class="nav-link" aria-current="page">Tabla usuarios</a></li>
+                    <!-- CONTROL DINÁMICO DE NAVEGACIÓN -->
+                    <li th:if="${session.account != null && session.account.rol.name() == 'ROLE_ADMIN'}">
+                        <a th:href="@{/admin/panel}" class="nav-link">Panel Admin</a>
+                    </li>
+                    <li th:if="${session.account != null && session.account.rol.name() == 'ROLE_ESPECIALISTA'}">
+                        <a th:href="@{/especialista/panel}" class="nav-link">Panel Especialista</a>
+                    </li>
+                    <li th:if="${session.account != null && session.account.rol.name() == 'ROLE_USUARIO'}">
+                        <a th:href="@{/usuario/panel}" class="nav-link">Mi Panel</a>
+                    </li>
+                    <li>
+                        <a th:href="@{/test}" class="nav-link active" aria-current="page">Todos los Tests</a>
+                    </li>
+                    <li th:if="${session.account != null && (session.account.rol.name() == 'ROLE_ADMIN' || session.account.rol.name() == 'ROLE_ESPECIALISTA')}">
+                        <a th:href="@{/test/sin-recomendacion}" class="nav-link">Tests Pendientes</a>
+                    </li>
                 </ul>
             </div>
         </div>
     </nav>
 </header>
+
 <div class="pageContainer">
-    <!-- Encabezado -->
+    <!-- ENCABEZADO CON CONTROL DINÁMICO -->
     <header class="page-header">
-        <h1 class="title page-title hiddenTitle">Historial de Tests de Ansiedad</h1>
+        <h1 class="title page-title hiddenTitle">
+            <!-- TÍTULO SEGÚN ROL -->
+            <span th:if="${session.account != null && session.account.rol.name() == 'ROLE_USUARIO'}">
+                Mis Tests Realizados
+            </span>
+            <span th:if="${session.account != null && session.account.rol.name() == 'ROLE_ESPECIALISTA'}">
+                Historial de Tests - Especialista
+            </span>
+            <span th:if="${session.account != null && session.account.rol.name() == 'ROLE_ADMIN'}">
+                Todos los Tests - Administración
+            </span>
+            <span th:if="${session.account == null}">
+                Historial de Tests
+            </span>
+        </h1>
+
+        <!-- ESTADÍSTICAS -->
+        <div class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="bg-blue-50 p-3 rounded-lg text-center">
+                <p class="text-sm text-blue-600">Total Tests</p>
+                <p class="text-xl font-bold text-blue-700" th:text="${#lists.size(tests)}">0</p>
+            </div>
+            <div class="bg-green-50 p-3 rounded-lg text-center">
+                <p class="text-sm text-green-600">Con Recomendación</p>
+                <p class="text-xl font-bold text-green-700">
+                    <span th:text="${#lists.size(tests.?[recomendacion != null])}">0</span>
+                </p>
+            </div>
+            <div class="bg-yellow-50 p-3 rounded-lg text-center">
+                <p class="text-sm text-yellow-600">Pendientes</p>
+                <p class="text-xl font-bold text-yellow-700">
+                    <span th:text="${#lists.size(tests.?[recomendacion == null])}">0</span>
+                </p>
+            </div>
+            <div class="bg-purple-50 p-3 rounded-lg text-center">
+                <p class="text-sm text-purple-600">Usuarios</p>
+                <p class="text-xl font-bold text-purple-700">
+                    <span th:text="${#lists.size(#sets.create(tests.![usuario.id]))}">0</span>
+                </p>
+            </div>
+        </div>
     </header>
 
-    <!-- Botón para nuevo test -->
-    <div class="newuser-container">
-        <a th:href="@{/test/formTest}">
-            <button class="btn-newuser">Realizar Nuevo Test</button>
-        </a>
+    <!-- BOTONES DE ACCIÓN (SEGÚN ROL) -->
+    <div class="flex flex-wrap gap-3 mb-6">
+        <!-- BOTÓN PARA USUARIOS -->
+        <div th:if="${session.account != null && session.account.rol.name() == 'ROLE_USUARIO'}">
+            <a th:href="@{/usuario/test}">
+                <button class="btn-newuser">Realizar Nuevo Test</button>
+            </a>
+        </div>
+
+        <!-- BOTÓN PARA ADMIN/ESPECIALISTA -->
+        <div th:if="${session.account != null && (session.account.rol.name() == 'ROLE_ADMIN' || session.account.rol.name() == 'ROLE_ESPECIALISTA')}">
+            <a th:href="@{/test/form}">
+                <button class="btn-newuser">Crear Test Manual</button>
+            </a>
+        </div>
+
+        <!-- FILTRO PARA ESPECIALISTA -->
+        <div th:if="${session.account != null && session.account.rol.name() == 'ROLE_ESPECIALISTA'}" class="ml-auto">
+            <a th:href="@{/test/sin-recomendacion}">
+                <button class="btn-search">Ver Tests Pendientes</button>
+            </a>
+        </div>
     </div>
 
-    <!-- Tabla de historial -->
-    <table class="user-table">
-        <thead class="table-head">
-        <tr>
-            <th class="table-header">ID</th>
-            <th class="table-header">Puntuación</th>
-            <th class="table-header">Nivel</th>
-            <th class="table-header">Acciones</th>
-        </tr>
-        </thead>
-        <tbody class="table-body">
-        <tr class="table-row" th:each="test : ${tests}">
-            <td class="table-cell" th:text="${test.id}"></td>
-            <td class="table-cell" th:text="${test.puntuacionTotal}"></td>
-            <td class="table-cell" th:text="${test.nivelAnsiedad}"></td>
-            <td class="table-cell">
-                <div class="table-actions">
-                    <a th:href="@{/test/resultado/{id}(id=${test.id})}">
-                        <button class="btn-edit">Ver Resultado</button>
+    <!-- TABLA DE TESTS CON RELACIONES -->
+    <div class="overflow-x-auto bg-white rounded-lg shadow">
+        <table class="user-table min-w-full">
+            <thead class="table-head bg-gray-100">
+            <tr>
+                <th class="table-header">ID</th>
+                <th class="table-header">Fecha</th>
+                <!-- COLUMNA USUARIO (SOLO PARA ADMIN/ESPECIALISTA) -->
+                <th class="table-header"
+                    th:if="${session.account != null && (session.account.rol.name() == 'ROLE_ADMIN' || session.account.rol.name() == 'ROLE_ESPECIALISTA')}">
+                    Usuario
+                </th>
+                <th class="table-header">Puntuación</th>
+                <th class="table-header">Nivel Ansiedad</th>
+                <th class="table-header">Recomendación</th>
+                <th class="table-header">Acciones</th>
+            </tr>
+            </thead>
+            <tbody class="table-body divide-y divide-gray-200">
+            <tr class="table-row hover:bg-gray-50" th:each="test : ${tests}">
+                <!-- ID -->
+                <td class="table-cell font-medium" th:text="${test.id}"></td>
+
+                <!-- FECHA -->
+                <td class="table-cell">
+                    <div th:text="${#temporals.format(test.fechaRealizacion, 'dd/MM/yyyy')}"></div>
+                    <div class="text-sm text-gray-500"
+                         th:text="${#temporals.format(test.fechaRealizacion, 'HH:mm')}"></div>
+                </td>
+
+                <!-- USUARIO (SOLO PARA ADMIN/ESPECIALISTA) -->
+                <td class="table-cell"
+                    th:if="${session.account != null && (session.account.rol.name() == 'ROLE_ADMIN' || session.account.rol.name() == 'ROLE_ESPECIALISTA')}">
+                    <div th:if="${test.usuario != null}">
+                        <div class="font-medium"
+                             th:text="${test.usuario.nombre + ' ' + test.usuario.apellido}"></div>
+                        <div class="text-sm text-gray-500"
+                             th:text="${test.usuario.cedula}"></div>
+                    </div>
+                    <div th:unless="${test.usuario != null}" class="text-gray-400">
+                        Sin usuario
+                    </div>
+                </td>
+
+                <!-- PUNTUACIÓN -->
+                <td class="table-cell">
+                    <span class="px-2 py-1 text-xs font-semibold rounded-full"
+                          th:classappend="${test.puntuacionTotal <= 15} ? 'bg-green-100 text-green-800' :
+                                         ${test.puntuacionTotal <= 30} ? 'bg-blue-100 text-blue-800' :
+                                         ${test.puntuacionTotal <= 45} ? 'bg-yellow-100 text-yellow-800' :
+                                         ${test.puntuacionTotal <= 60} ? 'bg-orange-100 text-orange-800' :
+                                         'bg-red-100 text-red-800'">
+                        <span th:text="${test.puntuacionTotal}"></span> pts
+                    </span>
+                </td>
+
+                <!-- NIVEL ANSIEDAD -->
+                <td class="table-cell">
+                    <span class="px-2 py-1 text-xs font-semibold rounded-full"
+                          th:classappend="${test.nivelAnsiedad == 'Mínima'} ? 'bg-green-100 text-green-800' :
+                                         ${test.nivelAnsiedad == 'Leve'} ? 'bg-blue-100 text-blue-800' :
+                                         ${test.nivelAnsiedad == 'Moderada'} ? 'bg-yellow-100 text-yellow-800' :
+                                         ${test.nivelAnsiedad == 'Grave'} ? 'bg-orange-100 text-orange-800' :
+                                         'bg-red-100 text-red-800'">
+                        <span th:text="${test.nivelAnsiedad}"></span>
+                    </span>
+                </td>
+
+                <!-- RECOMENDACIÓN -->
+                <td class="table-cell">
+                    <div th:if="${test.recomendacion != null}" class="flex items-center">
+                        <svg class="w-4 h-4 text-green-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                        <span class="text-sm text-green-600">Asignada</span>
+                    </div>
+                    <div th:unless="${test.recomendacion != null}" class="flex items-center">
+                        <svg class="w-4 h-4 text-yellow-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 000 2h6a1 1 0 100-2H7z" clip-rule="evenodd"/>
+                        </svg>
+                        <span class="text-sm text-yellow-600">Pendiente</span>
+                    </div>
+                </td>
+
+                <!-- ACCIONES (SEGÚN ROL) -->
+                <td class="table-actions">
+                    <!-- VER DETALLES -->
+                    <a th:href="@{/test/detalle/}+${test.id}" class="btn-link mr-2">
+                        <button class="btn-edit">Ver</button>
                     </a>
-                    <a th:href="@{/test/eliminarTest/{id}(id=${test.id})}">
-                        <button class="btn-delete">Eliminar</button>
-                    </a>
-                </div>
-            </td>
-        </tr>
-        </tbody>
-    </table>
+
+                    <!-- ELIMINAR (SOLO ADMIN) -->
+                    <span th:if="${session.account != null && session.account.rol.name() == 'ROLE_ADMIN'}">
+                        <a th:href="@{/test/eliminar/}+${test.id}" class="btn-link">
+                            <button class="btn-delete"
+                                    onclick="return confirm('¿Está seguro de eliminar este test?')">
+                                Eliminar
+                            </button>
+                        </a>
+                    </span>
+
+                    <!-- AÑADIR RECOMENDACIÓN (ESPECIALISTA) -->
+                    <span th:if="${session.account != null && session.account.rol.name() == 'ROLE_ESPECIALISTA' && test.recomendacion == null}">
+                        <a th:href="@{/especialista/recomendacion/}+${test.id}" class="btn-link ml-2">
+                            <button class="btn-search">Añadir Recom.</button>
+                        </a>
+                    </span>
+                </td>
+            </tr>
+
+            <!-- MENSAJE SI NO HAY TESTS -->
+            <tr th:if="${#lists.isEmpty(tests)}">
+                <td colspan="7" class="table-cell text-center py-8">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                    </svg>
+                    <h3 class="mt-2 text-lg font-medium text-gray-900">No hay tests registrados</h3>
+                    <p class="mt-1 text-gray-500">Comienza realizando un test de ansiedad.</p>
+                    <div class="mt-4">
+                        <a th:href="@{/usuario/test}" class="btn-newuser">
+                            Realizar Primer Test
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
 </div>
 
-<!--footer-->
+<!-- FOOTER -->
 <footer class="footerBg">
     <div class="mx-auto w-full max-w-screen-xl p-4 py-6 lg:py-8">
         <div class="md:flex md:justify-between">
             <div class="mb-6 md:mb-0">
-                <a class="flex items-center">
-                    <img th:src="@{/images/pruebaEstres.png}" class="h-7 me-3" alt="FlowBite Logo" />
+                <a th:href="@{/}" class="flex items-center">
+                    <img th:src="@{images/pruebaEstres.png}" class="h-7 me-3" alt="CureStress Logo" />
                     <span class="text-heading self-center text-2xl font-semibold whitespace-nowrap">CureStress</span>
                 </a>
             </div>
             <div class="grid grid-cols-2 gap-8 sm:gap-6 sm:grid-cols-3">
                 <div>
-                    <h2 class="mb-6 text-sm font-semibold text-heading uppercase">Índice</h2>
+                    <h2 class="mb-6 text-sm font-semibold text-heading uppercase">Navegación</h2>
                     <ul class="text-body font-medium">
                         <li class="mb-4">
-                            <a th:href="@{/inicio}" class="hover:underline">Inicio</a>
+                            <a th:href="@{/}" class="hover:underline">Inicio</a>
                         </li>
                         <li class="mb-4">
-                            <a th:href="@{/usuarios}" class="hover:underline">Tabla usuarios</a>
+                            <a th:href="@{/test}" class="hover:underline">Todos los Tests</a>
                         </li>
                         <li class="mb-4">
-                            <a th:href="@{/usuarios/formUsuario}" class="hover:underline">Formulario</a>
+                            <a th:href="@{/recomendaciones}" class="hover:underline">Recomendaciones</a>
                         </li>
                     </ul>
                 </div>
                 <div>
-                    <h2 class="mb-6 text-sm font-semibold text-heading uppercase">Siguenos</h2>
+                    <h2 class="mb-6 text-sm font-semibold text-heading uppercase">Información</h2>
                     <ul class="text-body font-medium">
                         <li class="mb-4">
-                            <a target="_blank" href="https://www.instagram.com/" class="hover:underline ">Instagram</a>
+                            <a th:href="@{/acerca}" class="hover:underline">Acerca de</a>
+                        </li>
+                        <li class="mb-4">
+                            <a th:href="@{/contacto}" class="hover:underline">Contacto</a>
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <h2 class="mb-6 text-sm font-semibold text-heading uppercase">Síguenos</h2>
+                    <ul class="text-body font-medium">
+                        <li class="mb-4">
+                            <a target="_blank" href="https://www.instagram.com/" class="hover:underline">Instagram</a>
                         </li>
                         <li class="mb-4">
                             <a target="_blank" href="https://www.youtube.com/" class="hover:underline">YouTube</a>
@@ -117,17 +312,22 @@
         </div>
         <hr class="my-6 border-default sm:mx-auto lg:my-8" />
         <div class="sm:flex sm:items-center sm:justify-between">
-          <span class="text-sm text-body sm:text-center">© 2025 <a  class="hover:underline">CureStress™</a>. All Rights Reserved.
-          </span>
+            <span class="text-sm text-body sm:text-center">
+                © 2025 <a class="hover:underline">CureStress™</a>. Todos los derechos reservados.
+            </span>
             <div class="flex mt-4 sm:justify-center sm:mt-0">
-                <a target="_blank" th:href="@{https://github.com/EduTama123/Taller-Uno-Progra3.git}" class="text-body hover:text-heading ms-5">
-                    <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12.006 2a9.847 9.847 0 0 0-6.484 2.44 10.32 10.32 0 0 0-3.393 6.17 10.48 10.48 0 0 0 1.317 6.955 10.045 10.045 0 0 0 5.4 4.418c.504.095.683-.223.683-.494 0-.245-.01-1.052-.014-1.908-2.78.62-3.366-1.21-3.366-1.21a2.711 2.711 0 0 0-1.11-1.5c-.907-.637.07-.621.07-.621.317.044.62.163.885.346.266.183.487.426.647.71.135.253.318.476.538.655a2.079 2.079 0 0 0 2.37.196c.045-.52.27-1.006.635-1.37-2.219-.259-4.554-1.138-4.554-5.07a4.022 4.022 0 0 1 1.031-2.75 3.77 3.77 0 0 1 .096-2.713s.839-.275 2.749 1.05a9.26 9.26 0 0 1 5.004 0c1.906-1.325 2.74-1.05 2.74-1.05.37.858.406 1.828.101 2.713a4.017 4.017 0 0 1 1.029 2.75c0 3.939-2.339 4.805-4.564 5.058a2.471 2.471 0 0 1 .679 1.897c0 1.372-.012 2.477-.012 2.814 0 .272.18.592.687.492a10.05 10.05 0 0 0 5.388-4.421 10.473 10.473 0 0 0 1.313-6.948 10.32 10.32 0 0 0-3.39-6.165A9.847 9.847 0 0 0 12.007 2Z" clip-rule="evenodd"/></svg>
+                <a target="_blank" th:href="@{https://github.com/EduTama123/Taller-dos-progra3.git}"
+                   class="text-body hover:text-heading ms-5">
+                    <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                        <path fill-rule="evenodd" d="M12.006 2a9.847 9.847 0 0 0-6.484 2.44 10.32 10.32 0 0 0-3.393 6.17 10.48 10.48 0 0 0 1.317 6.955 10.045 10.045 0 0 0 5.4 4.418c.504.095.683-.223.683-.494 0-.245-.01-1.052-.014-1.908-2.78.62-3.366-1.21-3.366-1.21a2.711 2.711 0 0 0-1.11-1.5c-.907-.637.07-.621.07-.621.317.044.62.163.885.346.266.183.487.426.647.71.135.253.318.476.538.655a2.079 2.079 0 0 0 2.37.196c.045-.52.27-1.006.635-1.37-2.219-.259-4.554-1.138-4.554-5.07a4.022 4.022 0 0 1 1.031-2.75 3.77 3.77 0 0 1 .096-2.713s.839-.275 2.749 1.05a9.26 9.26 0 0 1 5.004 0c1.906-1.325 2.74-1.05 2.74-1.05.37.858.406 1.828.101 2.713a4.017 4.017 0 0 1 1.029 2.75c0 3.939-2.339 4.805-4.564 5.058a2.471 2.471 0 0 1 .679 1.897c0 1.372-.012 2.477-.012 2.814 0 .272.18.592.687.492a10.05 10.05 0 0 0 5.388-4.421 10.473 10.473 0 0 0 1.313-6.948 10.32 10.32 0 0 0-3.39-6.165A9.847 9.847 0 0 0 12.007 2Z" clip-rule="evenodd"/>
+                    </svg>
                     <span class="sr-only">Enlace repo</span>
                 </a>
             </div>
         </div>
     </div>
 </footer>
+
 <script th:src="@{/js/index.js}"></script>
 </body>
 </html>

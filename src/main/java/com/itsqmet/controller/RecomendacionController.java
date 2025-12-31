@@ -7,9 +7,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Optional;
-
 @Controller
 @RequestMapping("/recomendaciones")
 public class RecomendacionController {
@@ -17,40 +14,48 @@ public class RecomendacionController {
     @Autowired
     private RecomendacionService recomendacionService;
 
-    // VER TODAS LAS RECOMENDACIONES (USUARIO + ESPECIALISTA)
+    // LEER TODAS LAS RECOMENDACIONES
     @GetMapping
-    public String verRecomendaciones(Model model) {
-        List<Recomendacion> recomendaciones = recomendacionService.obtenerTodas();
+    public String listaRecomendaciones(Model model) {
+        var recomendaciones = recomendacionService.mostrarRecomendaciones();
         model.addAttribute("recomendaciones", recomendaciones);
         return "pages/recomendacion";
     }
 
-    // FORMULARIO PARA CREAR/EDITAR (SOLO ESPECIALISTA)
+    // FORMULARIO PARA CREAR RECOMENDACION
     @GetMapping("/form")
-    public String formularioRecomendacion(Model model) {
+    public String crearRecomendacion(Model model) {
         model.addAttribute("recomendacion", new Recomendacion());
         return "pages/recomendacionForm";
     }
 
-    // FORMULARIO PARA EDITAR POR NIVEL
-    @GetMapping("/editar/{nivel}")
-    public String editarPorNivel(@PathVariable String nivel, Model model) {
-        Optional<Recomendacion> recomendacion = recomendacionService.obtenerPorNivel(nivel);
-        model.addAttribute("recomendacion", recomendacion.orElse(new Recomendacion()));
+    // GUARDAR RECOMENDACION
+    @PostMapping("/guardar")
+    public String guardarRecomendacion(@ModelAttribute Recomendacion recomendacion) {
+        recomendacionService.guardarRecomendacion(recomendacion);
+        return "redirect:/recomendaciones";
+    }
+
+    // FORMULARIO PARA EDITAR RECOMENDACION
+    @GetMapping("/editar/{id}")
+    public String editarRecomendacion(@PathVariable Long id, Model model) {
+        Recomendacion recomendacion = recomendacionService.buscarRecomendacionById(id);
+        model.addAttribute("recomendacion", recomendacion);
         return "pages/recomendacionForm";
     }
 
-    // GUARDAR RECOMENDACIÓN (SOLO ESPECIALISTA)
-    @PostMapping("/guardar")
-    public String guardarRecomendacion(@ModelAttribute Recomendacion recomendacion) {
-        recomendacionService.guardar(recomendacion);
+    // ELIMINAR RECOMENDACION
+    @GetMapping("/eliminar/{id}")
+    public String eliminarRecomendacion(@PathVariable Long id) {
+        recomendacionService.eliminarRecomendacion(id);
         return "redirect:/recomendaciones";
     }
 
-    // ELIMINAR (SOLO ESPECIALISTA)
-    @GetMapping("/eliminar/{id}")
-    public String eliminarRecomendacion(@PathVariable Long id) {
-        recomendacionService.eliminar(id);
-        return "redirect:/recomendaciones";
+    // VER DETALLE DE RECOMENDACION
+    @GetMapping("/detalle/{id}")
+    public String verDetalleRecomendacion(@PathVariable Long id, Model model) {
+        Recomendacion recomendacion = recomendacionService.buscarRecomendacionById(id);
+        model.addAttribute("recomendacion", recomendacion);
+        return "pages/detalleRecomendacion";
     }
 }

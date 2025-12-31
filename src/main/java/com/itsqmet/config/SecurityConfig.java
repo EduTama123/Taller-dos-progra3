@@ -12,48 +12,40 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    //encriptador para verifiar la contraseña
     @Bean
-    public PasswordEncoder passwordEncoder(){
+    public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-    //configuracion de la cadena de filtros o de seguridad
+
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // RUTAS PÚBLICAS
-                        .requestMatchers("/", "/inicio", "/login", "/cuentas/formCuenta",
-                                "/cuentas/registrarCuenta", "/login/postLogin").permitAll()
+                        // ========== RUTAS PÚBLICAS ==========
+                        .requestMatchers("/", "/inicio", "/login").permitAll()
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
 
-                        // BLOQUEAR INICIO DESDE PANELES
-                        .requestMatchers("/inicio").authenticated() // Ya no es público cuando estás logueado
+                        // ========== REGISTRO PÚBLICO ==========
+                        .requestMatchers("/cuentas/formCuenta", "/cuentas/registrarCuenta").permitAll()
 
-                        // PANELES
-                        .requestMatchers("/admin").hasRole("ADMIN")
-                        .requestMatchers("/usuario").hasRole("USUARIO")
-                        .requestMatchers("/especialista").hasRole("ESPECIALISTA")
+                        //PANELES SEGUN ROL
+                        .requestMatchers("/admin/panel", "/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/especialista/panel", "/especialista/**").hasRole("ESPECIALISTA")
+                        .requestMatchers("/usuario/panel", "/usuario/**").hasRole("USUARIO")
 
-                        // ASIGNAR PRIVILEGIOS POR ROLES
-                        .requestMatchers("/cuentas/**", "/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/test/**").hasAnyRole("ADMIN", "USUARIO", "ESPECIALISTA")
+                        //CRUD CUENTAS
+                        .requestMatchers("/cuentas").hasRole("ADMIN")
+                        .requestMatchers("/cuentas/editarCuenta/**", "/cuentas/eliminarCuenta/**").hasRole("ADMIN")
+                        .requestMatchers("/cuentas/formCuenta", "/cuentas/registrarCuenta").permitAll()
+                        .requestMatchers("/usuarios/formUsuario").permitAll()
+                        .requestMatchers("/usuarios/registrarUsuario").permitAll()
 
-                        //ESPECIALISTA NO PUEDE VER/MODIFICAR USUARIOS
-                        .requestMatchers("/usuarios/formUsuario").hasAnyRole("ADMIN", "USUARIO")
-                        .requestMatchers("/usuarios/registrarUsuario").hasAnyRole("ADMIN", "USUARIO")
-                        .requestMatchers("/usuarios/editarUsuario/**").hasAnyRole("ADMIN", "ESPECIALISTA")
-                        .requestMatchers("/usuarios/eliminarUsuario/**").hasRole("ADMIN")
-                        .requestMatchers("/usuarios").hasAnyRole("ADMIN") // Solo ADMIN ve lista de usuarios
+                        //RUTAS COMPARTIDAS
+                        .requestMatchers("/test/**").hasAnyRole("ADMIN", "ESPECIALISTA", "USUARIO")
+                        .requestMatchers("/recomendaciones/**").hasAnyRole("ADMIN", "ESPECIALISTA", "USUARIO")
 
-                        // RECOMENDACIONES
-                        .requestMatchers("/recomendaciones").hasAnyRole("ADMIN", "ESPECIALISTA", "USUARIO")
-                        .requestMatchers("/recomendaciones/form").hasAnyRole("ADMIN", "ESPECIALISTA")
-                        .requestMatchers("/recomendaciones/editar/**").hasAnyRole("ADMIN", "ESPECIALISTA")
-                        .requestMatchers("/recomendaciones/guardar").hasAnyRole("ADMIN", "ESPECIALISTA")
-                        .requestMatchers("/recomendaciones/eliminar/**").hasRole("ADMIN")
-
+                        // CUALQUIER OTRA RUTA
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
@@ -66,6 +58,7 @@ public class SecurityConfig {
                         .logoutSuccessUrl("/login?logout")
                         .permitAll()
                 );
+
         return http.build();
     }
 }

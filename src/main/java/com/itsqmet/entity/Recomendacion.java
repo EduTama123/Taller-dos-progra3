@@ -1,93 +1,73 @@
 package com.itsqmet.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Table(name = "recomendacion")
 public class Recomendacion {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String nivelAnsiedad; // "Leve", "Moderado", "Severo"
+    //VALIDACIONES
+    @NotBlank(message = "El nivel de ansiedad es obligatorio")
+    @Size(max = 50, message = "El nivel no puede exceder 50 caracteres")
+    @Column(nullable = false, unique = true, length = 50)
+    private String nivelAnsiedad;
+
+    @Size(max = 1000, message = "La recomendación no puede exceder 1000 caracteres")
+    @Column(length = 1000)
     private String recomendacion1;
+
+    @Size(max = 1000, message = "La recomendación no puede exceder 1000 caracteres")
+    @Column(length = 1000)
     private String recomendacion2;
+
+    @Size(max = 1000, message = "La recomendación no puede exceder 1000 caracteres")
+    @Column(length = 1000)
     private String recomendacion3;
+
+    @Size(max = 1000, message = "La recomendación no puede exceder 1000 caracteres")
+    @Column(length = 1000)
     private String recomendacion4;
+
+    @Size(max = 1000, message = "La recomendación no puede exceder 1000 caracteres")
+    @Column(length = 1000)
     private String recomendacion5;
 
-    // Constructor vacío
-    public Recomendacion() {
-    }
+    //RELACIONES
+    @OneToMany(mappedBy = "recomendacion", fetch = FetchType.LAZY)
+    private List<TestAnsiedad> tests = new ArrayList<>();
 
-    // Constructor con parámetros
-    public Recomendacion(String nivelAnsiedad, String recomendacion1, String recomendacion2,
-                         String recomendacion3, String recomendacion4, String recomendacion5) {
-        this.nivelAnsiedad = nivelAnsiedad;
-        this.recomendacion1 = recomendacion1;
-        this.recomendacion2 = recomendacion2;
-        this.recomendacion3 = recomendacion3;
-        this.recomendacion4 = recomendacion4;
-        this.recomendacion5 = recomendacion5;
-    }
-
-    // Getters y Setters
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getNivelAnsiedad() {
-        return nivelAnsiedad;
-    }
-
-    public void setNivelAnsiedad(String nivelAnsiedad) {
-        this.nivelAnsiedad = nivelAnsiedad;
-    }
-
-    public String getRecomendacion1() {
-        return recomendacion1;
-    }
-
-    public void setRecomendacion1(String recomendacion1) {
-        this.recomendacion1 = recomendacion1;
-    }
-
-    public String getRecomendacion2() {
-        return recomendacion2;
-    }
-
-    public void setRecomendacion2(String recomendacion2) {
-        this.recomendacion2 = recomendacion2;
-    }
-
-    public String getRecomendacion3() {
-        return recomendacion3;
-    }
-
-    public void setRecomendacion3(String recomendacion3) {
-        this.recomendacion3 = recomendacion3;
-    }
-
-    public String getRecomendacion4() {
-        return recomendacion4;
-    }
-
-    public void setRecomendacion4(String recomendacion4) {
-        this.recomendacion4 = recomendacion4;
-    }
-
-    public String getRecomendacion5() {
-        return recomendacion5;
-    }
-
-    public void setRecomendacion5(String recomendacion5) {
-        this.recomendacion5 = recomendacion5;
+    // METODO PERSONALIZADO
+    public List<String> getRecomendacionesList() {
+        List<String> recomendaciones = new ArrayList<>();
+        if (recomendacion1 != null && !recomendacion1.trim().isEmpty()) {
+            recomendaciones.add(recomendacion1);
+        }
+        if (recomendacion2 != null && !recomendacion2.trim().isEmpty()) {
+            recomendaciones.add(recomendacion2);
+        }
+        if (recomendacion3 != null && !recomendacion3.trim().isEmpty()) {
+            recomendaciones.add(recomendacion3);
+        }
+        if (recomendacion4 != null && !recomendacion4.trim().isEmpty()) {
+            recomendaciones.add(recomendacion4);
+        }
+        if (recomendacion5 != null && !recomendacion5.trim().isEmpty()) {
+            recomendaciones.add(recomendacion5);
+        }
+        return recomendaciones;
     }
 }
