@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista de Usuarios - Especialista</title>
+    <!-- FAVICON -->
+    <link rel="icon" th:href="@{/images/pruebaEstres.png}">
+    <link href="https://cdn.jsdelivr.net/npm/flowbite@4.0.1/dist/flowbite.min.css" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <link rel="stylesheet" th:href="@{/css/estilosTabla.css}">
+</head>
+<body>
+<!-- BARRA DE NAVEGACIÓN -->
+<header class="sticky w-full top-0 z-50">
+    <!-- PRIMER NAV -->
+    <nav class="navbar-top">
+        <div class="flex flex-wrap justify-between items-center mx-auto max-w-screen-xl p-4">
+            <a th:href="@{/especialista/panel}" class="logo flex items-center space-x-3 rtl:space-x-reverse">
+                <img th:src="@{images/pruebaEstres.png}" class="h-7" alt="CureStress Logo" />
+                <span class="self-center text-xl font-semibold whitespace-nowrap">CureStress</span>
+            </a>
+            <div class="flex items-center space-x-4">
+                <span class="text-white font-medium">Panel Especialista</span>
+                <form th:action="@{/logout}" method="post">
+                    <button type="submit"
+                            class="rounded-md bg-gray-600 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700">
+                        Cerrar sesión
+                    </button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <!-- SEGUNDO NAV -->
+    <nav class="navbar-bottom">
+        <div class="max-w-screen-xl px-4 py-3 mx-auto">
+            <div class="flex items-center justify-center">
+                <ul class="flex flex-row font-medium mt-0 space-x-8 rtl:space-x-reverse text-sm">
+                    <li><a th:href="@{/especialista/panel}" class="nav-link">Panel</a></li>
+                    <li><a th:href="@{/especialista/usuarios}" class="nav-link active" aria-current="page">Lista Usuarios</a></li>
+                    <li><a th:href="@{/test/sin-recomendacion}" class="nav-link">Tests Pendientes</a></li>
+                    <li><a th:href="@{/recomendaciones}" class="nav-link">Recomendaciones</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>
+
+<!-- CONTENIDO PRINCIPAL -->
+<div class="admin-panel max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <!-- ENCABEZADO -->
+    <div class="text-center mb-10">
+        <h1 class="admin-title text-4xl font-semibold mb-4">Lista de Usuarios</h1>
+        <p class="admin-subtitle text-gray-600 text-lg">
+            Selecciona un usuario para ver su historial de tests y gestionar recomendaciones.
+        </p>
+
+        <!-- ESTADÍSTICAS -->
+        <div class="mt-6 grid grid-cols-1 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
+            <div class="bg-blue-50 p-4 rounded-lg">
+                <p class="text-sm text-blue-600 font-medium">Total Usuarios</p>
+                <p class="text-2xl font-bold text-blue-700" th:text="${#lists.size(usuarios)}">0</p>
+            </div>
+            <div class="bg-green-50 p-4 rounded-lg">
+                <p class="text-sm text-green-600 font-medium">Con Tests</p>
+                <p class="text-2xl font-bold text-green-700">
+                    <!-- CONTAR USUARIOS QUE TIENEN AL MENOS UN TEST -->
+                    <span th:text="${#lists.size(usuarios.?[tests.size() > 0])}">0</span>
+                </p>
+            </div>
+            <div class="bg-yellow-50 p-4 rounded-lg">
+                <p class="text-sm text-yellow-600 font-medium">Pendientes</p>
+                <p class="text-2xl font-bold text-yellow-700">
+                    <!-- CONTAR USUARIOS CON TESTS SIN RECOMENDACIÓN -->
+                    <span th:text="${#lists.size(usuarios.?[tests.?[recomendacion == null].size() > 0])}">0</span>
+                </p>
+            </div>
+            <div class="bg-purple-50 p-4 rounded-lg">
+                <p class="text-sm text-purple-600 font-medium">Tests Totales</p>
+                <p class="text-2xl font-bold text-purple-700">
+                    <!-- SUMA DE TODOS LOS TESTS DE TODOS LOS USUARIOS -->
+                    <span th:text="${#aggregates.sum(usuarios.![tests.size()])}">0</span>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- BARRA DE BÚSQUEDA (COMO EN TU EJEMPLO DE CLASE) -->
+    <div class="mb-6 bg-white p-4 rounded-lg shadow">
+        <form th:action="@{/especialista/usuarios}" method="get" class="flex flex-col md:flex-row gap-4">
+            <div class="flex-grow">
+                <label for="buscar" class="block text-sm font-medium text-gray-700 mb-1">
+                    Buscar por nombre, apellido o cédula:
+                </label>
+                <input type="text"
+                       id="buscar"
+                       name="buscar"
+                       th:value="${param.buscar}"
+                       placeholder="Ingrese nombre, apellido o cédula"
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div class="flex items-end gap-2">
+                <button type="submit"
+                        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    Buscar
+                </button>
+                <a th:href="@{/especialista/usuarios}"
+                   class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300">
+                    Mostrar Todos
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- TABLA DE USUARIOS (CON RELACIONES COMO EN TU EJEMPLO) -->
+    <div class="bg-white shadow-md rounded-lg overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-100">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        ID
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Usuario
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Información
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Tests Realizados
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Estado
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Acciones
+                    </th>
+                </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                <!-- ITERACIÓN SOBRE USUARIOS (COMO EN TU EJEMPLO AUTOR → LIBROS) -->
+                <tr th:each="usuario, iterStat : ${usuarios}" th:classappend="${iterStat.odd} ? 'bg-gray-50' : 'bg-white'">
+                    <!-- ID -->
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" th:text="${usuario.id}"></td>
+
+                    <!-- NOMBRE Y APELLIDO -->
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                    <span class="text-blue-600 font-medium"
+                                          th:text="${usuario.nombre.substring(0, 1) + usuario.apellido.substring(0, 1)}"></span>
+                            </div>
+                            <div class="ml-4">
+                                <div class="text-sm font-medium text-gray-900">
+                                    <span th:text="${usuario.nombre + ' ' + usuario.apellido}"></span>
+                                </div>
+                                <div class="text-sm text-gray-500">
+                                    Cuenta: <span th:text="${usuario.account.username}"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+
+                    <!-- INFORMACIÓN (RELACIÓN Account → Usuario) -->
+                    <td class="px-6 py-4">
+                        <div class="text-sm text-gray-900">
+                            <div><strong>Cédula:</strong> <span th:text="${usuario.cedula}"></span></div>
+                            <div><strong>Teléfono:</strong> <span th:text="${usuario.telefono ?: 'No registrado'}"></span></div>
+                            <div><strong>Edad:</strong> <span th:text="${usuario.edad ?: 'No registrada'}"></span></div>
+                        </div>
+                    </td>
+
+                    <!-- TESTS REALIZADOS (RELACIÓN Usuario → Tests) -->
+                    <td class="px-6 py-4">
+                        <div class="text-sm">
+                            <!-- USANDO RELACIONES COMO EN TU EJEMPLO: autor.libros -->
+                            <div th:if="${usuario.tests.size() > 0}">
+                                <span class="font-medium text-gray-900" th:text="${usuario.tests.size()}"></span> tests
+                                <div class="text-xs text-gray-500 mt-1">
+                                    Último:
+                                    <span th:text="${#temporals.format(usuario.tests[0].fechaRealizacion, 'dd/MM/yyyy')}"></span>
+                                </div>
+                            </div>
+                            <div th:if="${usuario.tests.size() == 0}" class="text-gray-400">
+                                Sin tests realizados
+                            </div>
+                        </div>
+                    </td>
+
+                    <!-- ESTADO (CON CONTROL DINÁMICO) -->
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <!-- SI TIENE TESTS PENDIENTES -->
+                        <div th:if="${usuario.tests.?[recomendacion == null].size() > 0}">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                    </svg>
+                                    Pendiente
+                                </span>
+                            <div class="text-xs text-gray-500 mt-1">
+                                <span th:text="${usuario.tests.?[recomendacion == null].size()}"></span> tests sin recomendación
+                            </div>
+                        </div>
+
+                        <!-- SI NO TIENE TESTS PENDIENTES -->
+                        <div th:if="${usuario.tests.size() > 0 && usuario.tests.?[recomendacion == null].size() == 0}">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                    </svg>
+                                    Al día
+                                </span>
+                        </div>
+
+                        <!-- SI NO TIENE TESTS -->
+                        <div th:if="${usuario.tests.size() == 0}">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                                    Sin actividad
+                                </span>
+                        </div>
+                    </td>
+
+                    <!-- ACCIONES -->
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <!-- BOTÓN PARA VER HISTORIAL (COMO EN TU EJEMPLO) -->
+                        <a th:href="@{/especialista/historial/}+${usuario.id}"
+                           class="text-blue-600 hover:text-blue-900 mr-3">
+                            Ver Historial
+                        </a>
+
+                        <!-- BOTÓN PARA VER TESTS PENDIENTES (SI HAY) -->
+                        <a th:if="${usuario.tests.?[recomendacion == null].size() > 0}"
+                           th:href="@{/test/sin-recomendacion}?usuarioId=${usuario.id}"
+                           class="text-yellow-600 hover:text-yellow-900">
+                            Ver Pendientes
+                        </a>
+                    </td>
+                </tr>
+
+                <!-- MENSAJE SI NO HAY USUARIOS -->
+                <tr th:if="${#lists.isEmpty(usuarios)}">
+                    <td colspan="6" class="px-6 py-12 text-center">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <h3 class="mt-2 text-sm font-medium text-gray-900">No hay usuarios registrados</h3>
+                        <p class="mt-1 text-sm text-gray-500">No se encontraron usuarios en el sistema.</p>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- BOTONES DE NAVEGACIÓN -->
+    <div class="mt-8 flex justify-between">
+        <div>
+            <a th:href="@{/especialista/panel}"
+               class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                <svg class="mr-2 h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+                Volver al Panel
+            </a>
+        </div>
+
+        <!-- INFORMACIÓN ADICIONAL -->
+        <div class="text-sm text-gray-500">
+            Mostrando <span class="font-medium" th:text="${#lists.size(usuarios)}">0</span> usuarios
+        </div>
+    </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="footerBg mt-12">
+    <div class="mx-auto w-full max-w-screen-xl p-4 py-6 lg:py-8">
+        <div class="md:flex md:justify-between">
+            <div class="mb-6 md:mb-0">
+                <a th:href="@{/especialista/panel}" class="flex items-center">
+                    <img th:src="@{images/pruebaEstres.png}" class="h-7 me-3" alt="CureStress Logo" />
+                    <span class="text-heading self-center text-2xl font-semibold whitespace-nowrap">CureStress</span>
+                </a>
+            </div>
+            <div class="grid grid-cols-2 gap-8 sm:gap-6 sm:grid-cols-3">
+                <div>
+                    <h2 class="mb-6 text-sm font-semibold text-heading uppercase">Acciones</h2>
+                    <ul class="text-body font-medium">
+                        <li class="mb-4">
+                            <a th:href="@{/especialista/panel}" class="hover:underline">Panel Especialista</a>
+                        </li>
+                        <li class="mb-4">
+                            <a th:href="@{/especialista/usuarios}" class="hover:underline">Lista de Usuarios</a>
+                        </li>
+                        <li class="mb-4">
+                            <a th:href="@{/test/sin-recomendacion}" class="hover:underline">Tests Pendientes</a>
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <h2 class="mb-6 text-sm font-semibold text-heading uppercase">Gestionar</h2>
+                    <ul class="text-body font-medium">
+                        <li class="mb-4">
+                            <a th:href="@{/recomendaciones}" class="hover:underline">Recomendaciones</a>
+                        </li>
+                        <li class="mb-4">
+                            <a th:href="@{/test}" class="hover:underline">Todos los Tests</a>
+                        </li>
+                        <li class="mb-4">
+                            <a th:href="@{/recomendaciones/form}" class="hover:underline">Añadir Recomendación</a>
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <h2 class="mb-6 text-sm font-semibold text-heading uppercase">Síguenos</h2>
+                    <ul class="text-body font-medium">
+                        <li class="mb-4">
+                            <a target="_blank" href="https://www.instagram.com/" class="hover:underline">Instagram</a>
+                        </li>
+                        <li class="mb-4">
+                            <a target="_blank" href="https://www.youtube.com/" class="hover:underline">YouTube</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <hr class="my-6 border-default sm:mx-auto lg:my-8" />
+        <div class="sm:flex sm:items-center sm:justify-between">
+            <span class="text-sm text-body sm:text-center">
+                © 2025 <a class="hover:underline">CureStress™</a>. Todos los derechos reservados.
+            </span>
+            <div class="flex mt-4 sm:justify-center sm:mt-0">
+                <a target="_blank" th:href="@{https://github.com/EduTama123/Taller-dos-progra3.git}"
+                   class="text-body hover:text-heading ms-5">
+                    <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                        <path fill-rule="evenodd" d="M12.006 2a9.847 9.847 0 0 0-6.484 2.44 10.32 10.32 0 0 0-3.393 6.17 10.48 10.48 0 0 0 1.317 6.955 10.045 10.045 0 0 0 5.4 4.418c.504.095.683-.223.683-.494 0-.245-.01-1.052-.014-1.908-2.78.62-3.366-1.21-3.366-1.21a2.711 2.711 0 0 0-1.11-1.5c-.907-.637.07-.621.07-.621.317.044.62.163.885.346.266.183.487.426.647.71.135.253.318.476.538.655a2.079 2.079 0 0 0 2.37.196c.045-.52.27-1.006.635-1.37-2.219-.259-4.554-1.138-4.554-5.07a4.022 4.022 0 0 1 1.031-2.75 3.77 3.77 0 0 1 .096-2.713s.839-.275 2.749 1.05a9.26 9.26 0 0 1 5.004 0c1.906-1.325 2.74-1.05 2.74-1.05.37.858.406 1.828.101 2.713a4.017 4.017 0 0 1 1.029 2.75c0 3.939-2.339 4.805-4.564 5.058a2.471 2.471 0 0 1 .679 1.897c0 1.372-.012 2.477-.012 2.814 0 .272.18.592.687.492a10.05 10.05 0 0 0 5.388-4.421 10.473 10.473 0 0 0 1.313-6.948 10.32 10.32 0 0 0-3.39-6.165A9.847 9.847 0 0 0 12.007 2Z" clip-rule="evenodd"/>
+                    </svg>
+                    <span class="sr-only">Enlace repo</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script th:src="@{/js/index.js}"></script>
+</body>
+</html>

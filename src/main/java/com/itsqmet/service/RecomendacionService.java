@@ -5,7 +5,6 @@ import com.itsqmet.repository.RecomendacionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class RecomendacionService {
@@ -13,43 +12,48 @@ public class RecomendacionService {
     @Autowired
     private RecomendacionRepository recomendacionRepository;
 
-    // Obtener todas las recomendaciones
-    public List<Recomendacion> obtenerTodas() {
-        return recomendacionRepository.findAllByOrderByNivelAnsiedadAsc();
+    // LEER TODAS LAS RECOMENDACIONES
+    public List<Recomendacion> mostrarRecomendaciones() {
+        return recomendacionRepository.findAll();
     }
 
-    // Obtener por nivel de ansiedad
-    public Optional<Recomendacion> obtenerPorNivel(String nivelAnsiedad) {
-        return recomendacionRepository.findByNivelAnsiedad(nivelAnsiedad);
+    // BUSCAR RECOMENDACION POR ID
+    public Recomendacion buscarRecomendacionById(Long id) {
+        return recomendacionRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("RECOMENDACION NO ENCONTRADA"));
     }
 
-    // Guardar o actualizar recomendación
-    public void guardar(Recomendacion recomendacion) {
-        // Si ya existe una recomendación para este nivel, actualizarla
-        Optional<Recomendacion> existente = recomendacionRepository.findByNivelAnsiedad(recomendacion.getNivelAnsiedad());
-
-        if (existente.isPresent()) {
-            // Actualizar la existente
-            Recomendacion rec = existente.get();
-            rec.setRecomendacion1(recomendacion.getRecomendacion1());
-            rec.setRecomendacion2(recomendacion.getRecomendacion2());
-            rec.setRecomendacion3(recomendacion.getRecomendacion3());
-            rec.setRecomendacion4(recomendacion.getRecomendacion4());
-            rec.setRecomendacion5(recomendacion.getRecomendacion5());
-            recomendacionRepository.save(rec);
-        } else {
-            // Crear nueva
-            recomendacionRepository.save(recomendacion);
-        }
+    // BUSCAR RECOMENDACION POR NIVEL DE ANSIEDAD
+    public Recomendacion buscarPorNivelAnsiedad(String nivel) {
+        return recomendacionRepository.findByNivelAnsiedad(nivel);
     }
 
-    // Obtener por ID
-    public Optional<Recomendacion> obtenerPorId(Long id) {
-        return recomendacionRepository.findById(id);
+    // GUARDAR RECOMENDACION
+    public Recomendacion guardarRecomendacion(Recomendacion recomendacion) {
+        return recomendacionRepository.save(recomendacion);
     }
 
-    // Eliminar
-    public void eliminar(Long id) {
+    // ACTUALIZAR RECOMENDACION
+    public Recomendacion actualizarRecomendacion(Long id, Recomendacion recomendacionActualizada) {
+        Recomendacion recomendacionExistente = buscarRecomendacionById(id);
+
+        recomendacionExistente.setNivelAnsiedad(recomendacionActualizada.getNivelAnsiedad());
+        recomendacionExistente.setRecomendacion1(recomendacionActualizada.getRecomendacion1());
+        recomendacionExistente.setRecomendacion2(recomendacionActualizada.getRecomendacion2());
+        recomendacionExistente.setRecomendacion3(recomendacionActualizada.getRecomendacion3());
+        recomendacionExistente.setRecomendacion4(recomendacionActualizada.getRecomendacion4());
+        recomendacionExistente.setRecomendacion5(recomendacionActualizada.getRecomendacion5());
+
+        return recomendacionRepository.save(recomendacionExistente);
+    }
+
+    // ELIMINAR RECOMENDACION
+    public void eliminarRecomendacion(Long id) {
         recomendacionRepository.deleteById(id);
+    }
+
+    // VERIFICAR SI EXISTE RECOMENDACION PARA UN NIVEL
+    public boolean existeRecomendacionParaNivel(String nivel) {
+        return recomendacionRepository.findByNivelAnsiedad(nivel) != null;
     }
 }

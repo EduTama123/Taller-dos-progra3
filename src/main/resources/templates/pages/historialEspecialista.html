@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Historial del Usuario - CureStress</title>
+    <!-- FAVICON -->
+    <link rel="icon" th:href="@{/images/pruebaEstres.png}">
+    <link href="https://cdn.jsdelivr.net/npm/flowbite@4.0.1/dist/flowbite.min.css" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <link rel="stylesheet" th:href="@{/css/estilosTabla.css}">
+</head>
+<body>
+<!-- BARRA DE NAVEGACIÓN -->
+<header class="sticky w-full top-0 z-50">
+    <!-- PRIMER NAV -->
+    <nav class="navbar-top">
+        <div class="flex flex-wrap justify-between items-center mx-auto max-w-screen-xl p-4">
+            <a th:href="@{/especialista/panel}" class="logo flex items-center space-x-3 rtl:space-x-reverse">
+                <img th:src="@{images/pruebaEstres.png}" class="h-7" alt="CureStress Logo" />
+                <span class="self-center text-xl font-semibold whitespace-nowrap">CureStress</span>
+            </a>
+            <div class="flex items-center space-x-4">
+                <span class="text-white font-medium">Panel Especialista</span>
+                <form th:action="@{/logout}" method="post">
+                    <button type="submit"
+                            class="rounded-md bg-gray-600 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700">
+                        Cerrar sesión
+                    </button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <!-- SEGUNDO NAV -->
+    <nav class="navbar-bottom">
+        <div class="max-w-screen-xl px-4 py-3 mx-auto">
+            <div class="flex items-center justify-center">
+                <ul class="flex flex-row font-medium mt-0 space-x-8 rtl:space-x-reverse text-sm">
+                    <li><a th:href="@{/especialista/panel}" class="nav-link">Panel</a></li>
+                    <li><a th:href="@{/especialista/usuarios}" class="nav-link">Lista Usuarios</a></li>
+                    <li><a th:href="@{/test/sin-recomendacion}" class="nav-link">Tests Pendientes</a></li>
+                    <li><a th:href="@{/recomendaciones}" class="nav-link">Recomendaciones</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>
+
+<!-- CONTENIDO PRINCIPAL -->
+<div class="admin-panel max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <!-- INFORMACIÓN DEL USUARIO -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-800">
+                    Historial de:
+                    <span class="text-blue-600" th:text="${usuario.nombre + ' ' + usuario.apellido}"></span>
+                </h1>
+                <div class="mt-2 grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <p class="text-sm text-gray-500">Cédula</p>
+                        <p class="font-medium" th:text="${usuario.cedula}"></p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Teléfono</p>
+                        <p class="font-medium" th:text="${usuario.telefono} ?: 'No registrado'"></p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Edad</p>
+                        <p class="font-medium" th:text="${usuario.edad} ?: 'No registrada'"></p>
+                    </div>
+                </div>
+            </div>
+            <div class="text-right">
+                <!-- BOTÓN VOLVER CON CONTROL DINÁMICO -->
+                <a th:href="@{/especialista/usuarios}"
+                   class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                    <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                    </svg>
+                    Volver a Usuarios
+                </a>
+            </div>
+        </div>
+
+        <!-- ESTADÍSTICAS DEL USUARIO -->
+        <div class="mt-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="bg-blue-50 p-4 rounded-lg text-center">
+                <p class="text-sm text-blue-600">Total Tests</p>
+                <p class="text-2xl font-bold text-blue-700" th:text="${#lists.size(tests)}">0</p>
+            </div>
+            <div class="bg-green-50 p-4 rounded-lg text-center">
+                <p class="text-sm text-green-600">Promedio</p>
+                <p class="text-2xl font-bold text-green-700">
+                    <span th:if="${#lists.size(tests) > 0}">
+                        <span th:text="${#numbers.formatDecimal(T(java.lang.Double).parseDouble(#aggregates.sum(tests.![puntuacionTotal])/#lists.size(tests)), 1, 1)}">0.0</span>
+                    </span>
+                    <span th:if="${#lists.size(tests) == 0}">0.0</span>
+                </p>
+            </div>
+            <div class="bg-yellow-50 p-4 rounded-lg text-center">
+                <p class="text-sm text-yellow-600">Pendientes</p>
+                <p class="text-2xl font-bold text-yellow-700">
+                    <span th:text="${#lists.size(tests.?[recomendacion == null])}">0</span>
+                </p>
+            </div>
+            <div class="bg-purple-50 p-4 rounded-lg text-center">
+                <p class="text-sm text-purple-600">Último Test</p>
+                <p class="text-lg font-bold text-purple-700" th:if="${#lists.size(tests) > 0}">
+                    <span th:text="${#temporals.format(tests[0].fechaRealizacion, 'dd/MM/yyyy')}"></span>
+                </p>
+                <p class="text-lg font-bold text-purple-700" th:if="${#lists.size(tests) == 0}">N/A</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- TABLA DE TESTS DEL USUARIO -->
+    <div class="bg-white shadow-md rounded-lg overflow-hidden">
+        <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+            <h2 class="text-lg font-medium text-gray-800">Tests Realizados</h2>
+            <p class="text-sm text-gray-600">
+                Lista completa de tests realizados por este usuario.
+            </p>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-100">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Fecha
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Puntuación
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Nivel
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Recomendación
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Acciones
+                    </th>
+                </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                <!-- ITERACIÓN SOBRE TESTS -->
+                <tr th:each="test, iterStat : ${tests}" th:classappend="${iterStat.odd} ? 'bg-gray-50' : 'bg-white'">
+                    <!-- FECHA -->
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-900"
+                             th:text="${#temporals.format(test.fechaRealizacion, 'dd/MM/yyyy')}"></div>
+                        <div class="text-sm text-gray-500"
+                             th:text="${#temporals.format(test.fechaRealizacion, 'HH:mm')}"></div>
+                    </td>
+
+                    <!-- PUNTUACIÓN -->
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-center">
+                                <span class="px-3 py-1 text-sm font-semibold rounded-full"
+                                      th:classappend="${test.puntuacionTotal <= 15} ? 'bg-green-100 text-green-800' :
+                                                     ${test.puntuacionTotal <= 30} ? 'bg-blue-100 text-blue-800' :
+                                                     ${test.puntuacionTotal <= 45} ? 'bg-yellow-100 text-yellow-800' :
+                                                     ${test.puntuacionTotal <= 60} ? 'bg-orange-100 text-orange-800' :
+                                                     'bg-red-100 text-red-800'">
+                                    <span th:text="${test.puntuacionTotal}"></span> pts
+                                </span>
+                        </div>
+                    </td>
+
+                    <!-- NIVEL DE ANSIEDAD -->
+                    <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full"
+                                  th:classappend="${test.nivelAnsiedad == 'Mínima'} ? 'bg-green-100 text-green-800' :
+                                                 ${test.nivelAnsiedad == 'Leve'} ? 'bg-blue-100 text-blue-800' :
+                                                 ${test.nivelAnsiedad == 'Moderada'} ? 'bg-yellow-100 text-yellow-800' :
+                                                 ${test.nivelAnsiedad == 'Grave'} ? 'bg-orange-100 text-orange-800' :
+                                                 'bg-red-100 text-red-800'">
+                                <span th:text="${test.nivelAnsiedad}"></span>
+                            </span>
+                    </td>
+
+                    <!-- RECOMENDACIÓN (CON CONTROL DINÁMICO) -->
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <!-- SI TIENE RECOMENDACIÓN -->
+                        <div th:if="${test.recomendacion != null}" class="flex items-center">
+                            <svg class="h-5 w-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                            <div>
+                                <span class="text-sm font-medium text-green-600">Asignada</span>
+                                <div class="text-xs text-gray-500">
+                                    Nivel: <span th:text="${test.recomendacion.nivelAnsiedad}"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SI NO TIENE RECOMENDACIÓN -->
+                        <div th:unless="${test.recomendacion != null}" class="flex items-center">
+                            <svg class="h-5 w-5 text-yellow-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                            </svg>
+                            <span class="text-sm font-medium text-yellow-600">Necesita recomendación</span>
+                        </div>
+                    </td>
+
+                    <!-- ACCIONES (CON CONTROL DINÁMICO COMO EN CLASE) -->
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <!-- CONTROL: SI TIENE RECOMENDACIÓN -> ACTUALIZAR, SI NO -> AÑADIR -->
+                        <a th:href="${test.recomendacion != null} ?
+                                        @{/especialista/recomendacion/} + ${test.id} :
+                                        @{/especialista/recomendacion/} + ${test.id}"
+                           class="mr-3"
+                           th:classappend="${test.recomendacion != null} ?
+                                             'text-blue-600 hover:text-blue-900' :
+                                             'text-green-600 hover:text-green-900'">
+                            <span th:if="${test.recomendacion != null}">Actualizar Recom.</span>
+                            <span th:unless="${test.recomendacion != null}">Añadir Recom.</span>
+                        </a>
+
+                        <!-- VER DETALLES -->
+                        <a th:href="@{/test/detalle/}+${test.id}"
+                           class="text-gray-600 hover:text-gray-900">
+                            Ver Detalles
+                        </a>
+                    </td>
+                </tr>
+
+                <!-- MENSAJE SI NO HAY TESTS -->
+                <tr th:if="${#lists.isEmpty(tests)}">
+                    <td colspan="5" class="px-6 py-12 text-center">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                        </svg>
+                        <h3 class="mt-2 text-sm font-medium text-gray-900">Este usuario no tiene tests</h3>
+                        <p class="mt-1 text-sm text-gray-500">El usuario aún no ha realizado ningún test de ansiedad.</p>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- RESUMEN POR NIVELES -->
+    <div class="mt-8 grid grid-cols-1 md:grid-cols-5 gap-4">
+        <div class="bg-green-50 p-4 rounded-lg text-center">
+            <p class="text-sm text-green-600">Mínima</p>
+            <p class="text-2xl font-bold text-green-700">
+                <span th:text="${#lists.size(tests.?[nivelAnsiedad == 'Mínima'])}">0</span>
+            </p>
+        </div>
+        <div class="bg-blue-50 p-4 rounded-lg text-center">
+            <p class="text-sm text-blue-600">Leve</p>
+            <p class="text-2xl font-bold text-blue-700">
+                <span th:text="${#lists.size(tests.?[nivelAnsiedad == 'Leve'])}">0</span>
+            </p>
+        </div>
+        <div class="bg-yellow-50 p-4 rounded-lg text-center">
+            <p class="text-sm text-yellow-600">Moderada</p>
+            <p class="text-2xl font-bold text-yellow-700">
+                <span th:text="${#lists.size(tests.?[nivelAnsiedad == 'Moderada'])}">0</span>
+            </p>
+        </div>
+        <div class="bg-orange-50 p-4 rounded-lg text-center">
+            <p class="text-sm text-orange-600">Grave</p>
+            <p class="text-2xl font-bold text-orange-700">
+                <span th:text="${#lists.size(tests.?[nivelAnsiedad == 'Grave'])}">0</span>
+            </p>
+        </div>
+        <div class="bg-red-50 p-4 rounded-lg text-center">
+            <p class="text-sm text-red-600">Extrema</p>
+            <p class="text-2xl font-bold text-red-700">
+                <span th:text="${#lists.size(tests.?[nivelAnsiedad == 'Extrema'])}">0</span>
+            </p>
+        </div>
+    </div>
+
+    <!-- BOTONES DE ACCIÓN -->
+    <div class="mt-8 flex justify-between">
+        <div>
+            <a th:href="@{/especialista/usuarios}"
+               class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                <svg class="mr-2 h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+                Volver a Usuarios
+            </a>
+        </div>
+        <div>
+            <a th:href="@{/especialista/panel}"
+               class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                </svg>
+                Ir al Panel
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="footerBg mt-12">
+    <div class="mx-auto w-full max-w-screen-xl p-4 py-6 lg:py-8">
+        <div class="md:flex md:justify-between">
+            <div class="mb-6 md:mb-0">
+                <a th:href="@{/especialista/panel}" class="flex items-center">
+                    <img th:src="@{images/pruebaEstres.png}" class="h-7 me-3" alt="CureStress Logo" />
+                    <span class="text-heading self-center text-2xl font-semibold whitespace-nowrap">CureStress</span>
+                </a>
+            </div>
+            <div class="grid grid-cols-2 gap-8 sm:gap-6 sm:grid-cols-3">
+                <div>
+                    <h2 class="mb-6 text-sm font-semibold text-heading uppercase">Acciones</h2>
+                    <ul class="text-body font-medium">
+                        <li class="mb-4">
+                            <a th:href="@{/especialista/panel}" class="hover:underline">Panel Especialista</a>
+                        </li>
+                        <li class="mb-4">
+                            <a th:href="@{/especialista/usuarios}" class="hover:underline">Lista de Usuarios</a>
+                        </li>
+                        <li class="mb-4">
+                            <a th:href="@{/test/sin-recomendacion}" class="hover:underline">Tests Pendientes</a>
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <h2 class="mb-6 text-sm font-semibold text-heading uppercase">Gestionar</h2>
+                    <ul class="text-body font-medium">
+                        <li class="mb-4">
+                            <a th:href="@{/recomendaciones}" class="hover:underline">Recomendaciones</a>
+                        </li>
+                        <li class="mb-4">
+                            <a th:href="@{/test}" class="hover:underline">Todos los Tests</a>
+                        </li>
+                        <li class="mb-4">
+                            <a th:href="@{/recomendaciones/form}" class="hover:underline">Añadir Recomendación</a>
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <h2 class="mb-6 text-sm font-semibold text-heading uppercase">Síguenos</h2>
+                    <ul class="text-body font-medium">
+                        <li class="mb-4">
+                            <a target="_blank" href="https://www.instagram.com/" class="hover:underline">Instagram</a>
+                        </li>
+                        <li class="mb-4">
+                            <a target="_blank" href="https://www.youtube.com/" class="hover:underline">YouTube</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <hr class="my-6 border-default sm:mx-auto lg:my-8" />
+        <div class="sm:flex sm:items-center sm:justify-between">
+            <span class="text-sm text-body sm:text-center">
+                © 2025 <a class="hover:underline">CureStress™</a>. Todos los derechos reservados.
+            </span>
+            <div class="flex mt-4 sm:justify-center sm:mt-0">
+                <a target="_blank" th:href="@{https://github.com/EduTama123/Taller-dos-progra3.git}"
+                   class="text-body hover:text-heading ms-5">
+                    <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                        <path fill-rule="evenodd" d="M12.006 2a9.847 9.847 0 0 0-6.484 2.44 10.32 10.32 0 0 0-3.393 6.17 10.48 10.48 0 0 0 1.317 6.955 10.045 10.045 0 0 0 5.4 4.418c.504.095.683-.223.683-.494 0-.245-.01-1.052-.014-1.908-2.78.62-3.366-1.21-3.366-1.21a2.711 2.711 0 0 0-1.11-1.5c-.907-.637.07-.621.07-.621.317.044.62.163.885.346.266.183.487.426.647.71.135.253.318.476.538.655a2.079 2.079 0 0 0 2.37.196c.045-.52.27-1.006.635-1.37-2.219-.259-4.554-1.138-4.554-5.07a4.022 4.022 0 0 1 1.031-2.75 3.77 3.77 0 0 1 .096-2.713s.839-.275 2.749 1.05a9.26 9.26 0 0 1 5.004 0c1.906-1.325 2.74-1.05 2.74-1.05.37.858.406 1.828.101 2.713a4.017 4.017 0 0 1 1.029 2.75c0 3.939-2.339 4.805-4.564 5.058a2.471 2.471 0 0 1 .679 1.897c0 1.372-.012 2.477-.012 2.814 0 .272.18.592.687.492a10.05 10.05 0 0 0 5.388-4.421 10.473 10.473 0 0 0 1.313-6.948 10.32 10.32 0 0 0-3.39-6.165A9.847 9.847 0 0 0 12.007 2Z" clip-rule="evenodd"/>
+                    </svg>
+                    <span class="sr-only">Enlace repo</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script th:src="@{/js/index.js}"></script>
+</body>
+</html>

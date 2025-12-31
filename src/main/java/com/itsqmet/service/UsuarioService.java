@@ -3,79 +3,57 @@ package com.itsqmet.service;
 import com.itsqmet.entity.Usuario;
 import com.itsqmet.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
-
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class UsuarioService {
 
-    // Inyeccion de dependencias
     @Autowired
     private UsuarioRepository usuarioRepository;
 
-    // Leer
+    // LEER TODOS LOS USUARIOS
     public List<Usuario> mostrarUsuarios() {
         return usuarioRepository.findAll();
     }
 
-    // Buscar por id
-    public Optional<Usuario> buscarUsuarioById(Long id) {
-        return usuarioRepository.findById(id);
+    // BUSCAR USUARIO POR ID
+    public Usuario buscarUsuarioById(Long id) {
+        return usuarioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("USUARIO NO ENCONTRADO"));
     }
 
-    // Buscar por nombre O cédula (EXACTO como LibroService)
-    public List<Usuario> buscarUsuarioPorNombreOCedula(String buscar) {
-        if (buscar == null || buscar.isEmpty()) {
-            return usuarioRepository.findAll();
-        } else {
-            // Buscar en nombre Y cédula usando los métodos del Repository
-            List<Usuario> porNombre = usuarioRepository.findByNombreContainingIgnoreCase(buscar);
-            List<Usuario> porCedula = usuarioRepository.findByCedulaContaining(buscar);
-
-            // Combinar resultados sin duplicados
-            List<Usuario> resultados = new ArrayList<>(porNombre);
-
-            for (Usuario usuario : porCedula) {
-                if (!resultados.contains(usuario)) {
-                    resultados.add(usuario);
-                }
-            }
-
-            return resultados;
-        }
+    // BUSCAR USUARIO POR CEDULA
+    public Usuario buscarPorCedula(String cedula) {
+        return usuarioRepository.findByCedula(cedula);
     }
 
-    // Guardar usuario
+    // GUARDAR USUARIO
     public Usuario guardarUsuario(Usuario usuario) {
-        usuarioRepository.save(usuario);
-        return usuario;
+        return usuarioRepository.save(usuario);
     }
 
-    // Actualizar usuario
-    public Usuario actualizarUsuario(Long id, Usuario usuario) {
-        Usuario usuarioExistente = buscarUsuarioById(id)
-                .orElseThrow(() -> new RuntimeException("Usuario no existe"));
+    // ACTUALIZAR USUARIO
+    public Usuario actualizarUsuario(Long id, Usuario usuarioActualizado) {
+        Usuario usuarioExistente = buscarUsuarioById(id);
 
-        usuarioExistente.setNombre(usuario.getNombre());
-        usuarioExistente.setApellido(usuario.getApellido());
-        usuarioExistente.setCedula(usuario.getCedula());
-        usuarioExistente.setDireccion(usuario.getDireccion());
-        usuarioExistente.setTelefono(usuario.getTelefono());
-        usuarioExistente.setEdad(usuario.getEdad());
+        usuarioExistente.setNombre(usuarioActualizado.getNombre());
+        usuarioExistente.setApellido(usuarioActualizado.getApellido());
+        usuarioExistente.setCedula(usuarioActualizado.getCedula());
+        usuarioExistente.setDireccion(usuarioActualizado.getDireccion());
+        usuarioExistente.setTelefono(usuarioActualizado.getTelefono());
+        usuarioExistente.setEdad(usuarioActualizado.getEdad());
 
         return usuarioRepository.save(usuarioExistente);
     }
 
-    // Eliminar usuario
+    // ELIMINAR USUARIO
     public void eliminarUsuario(Long id) {
-        Usuario usuario = buscarUsuarioById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Usuario no existe"));
-        usuarioRepository.delete(usuario);
+        usuarioRepository.deleteById(id);
+    }
+
+    // OBTENER USUARIO POR CUENTA
+    public Usuario obtenerPorCuentaId(Long accountId) {
+        return usuarioRepository.findByAccountId(accountId);
     }
 }

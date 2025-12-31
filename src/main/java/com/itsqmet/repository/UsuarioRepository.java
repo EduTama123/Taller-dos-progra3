@@ -3,15 +3,14 @@ package com.itsqmet.repository;
 import com.itsqmet.entity.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
-    // Metodo para buscar usuarios por nombre (ignorando mayusculas/minusculas)
-    List<Usuario> findByNombreContainingIgnoreCase(String nombre);
+    // BUSCAR USUARIO POR CEDULA EXACTA
+    Usuario findByCedula(String cedula);
 
-    // Metodo para buscar usuarios por cedula (busqueda exacta parcial)
-    List<Usuario> findByCedulaContaining(String cedula);
+    // BUSCAR USUARIO POR ID DE CUENTA ASOCIADA
+    Usuario findByAccountId(Long accountId);
 }

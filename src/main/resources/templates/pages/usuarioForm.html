@@ -42,7 +42,10 @@
 
 <form th:action="@{/usuarios/registrarUsuario}" method="post" th:object="${usuario}" class="user-form">
 
-    <!-- CAMPO ID OCULTO (CRÍTICO para actualizar) -->
+    <!-- CAMPO OCULTO para indicar si es nuevo registro -->
+    <input type="hidden" name="esRegistroNuevo" th:value="${esRegistroNuevo}">
+
+    <!-- CAMPO ID OCULTO -->
     <input type="hidden" th:field="*{id}" class="hidden-id">
 
     <!-- Campo: Nombre -->
