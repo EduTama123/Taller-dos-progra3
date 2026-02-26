@@ -21,7 +21,6 @@ public class TestAnsiedad {
     private Long id;
 
     // CADA PREGUNTA DEBE ESTAR ENTRE 0 Y 6
-    //VALIDACIONES
     @NotNull(message = "La pregunta 1 es obligatoria")
     @Min(value = 0, message = "El valor mínimo es 0")
     @Max(value = 6, message = "El valor máximo es 6")
@@ -91,32 +90,51 @@ public class TestAnsiedad {
     @Column(nullable = false)
     private LocalDateTime fechaRealizacion;
 
-    //RELACIONES
+    // RELACIONES
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
 
+    // La recomendación puede ser nula al principio
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recomendacion_id")
     private Recomendacion recomendacion;
 
-    // METODO PARA CALCULAR RESULTADOS
+    // Constructor para facilitar la creación
+    public TestAnsiedad(Usuario usuario, Integer p1, Integer p2, Integer p3, Integer p4, Integer p5,
+                        Integer p6, Integer p7, Integer p8, Integer p9, Integer p10) {
+        this.usuario = usuario;
+        this.pregunta1 = p1;
+        this.pregunta2 = p2;
+        this.pregunta3 = p3;
+        this.pregunta4 = p4;
+        this.pregunta5 = p5;
+        this.pregunta6 = p6;
+        this.pregunta7 = p7;
+        this.pregunta8 = p8;
+        this.pregunta9 = p9;
+        this.pregunta10 = p10;
+        this.fechaRealizacion = LocalDateTime.now();
+        calcularResultados();
+    }
+
+    // MÉTODO PARA CALCULAR RESULTADOS
     public void calcularResultados() {
         this.puntuacionTotal = pregunta1 + pregunta2 + pregunta3 + pregunta4 + pregunta5 +
                 pregunta6 + pregunta7 + pregunta8 + pregunta9 + pregunta10;
 
-        if (this.puntuacionTotal <= 15) {
+        // Asignar nivel según puntuación
+        if (this.puntuacionTotal <= 10) {
             this.nivelAnsiedad = "Mínima";
-        } else if (this.puntuacionTotal <= 30) {
+        } else if (this.puntuacionTotal <= 20) {
             this.nivelAnsiedad = "Leve";
-        } else if (this.puntuacionTotal <= 45) {
+        } else if (this.puntuacionTotal <= 30) {
             this.nivelAnsiedad = "Moderada";
-        } else if (this.puntuacionTotal <= 60) {
-            this.nivelAnsiedad = "Grave";
         } else {
-            this.nivelAnsiedad = "Extrema";
+            this.nivelAnsiedad = "Severa";
         }
 
+        // Si no tiene fecha, asignar la actual
         if (this.fechaRealizacion == null) {
             this.fechaRealizacion = LocalDateTime.now();
         }
