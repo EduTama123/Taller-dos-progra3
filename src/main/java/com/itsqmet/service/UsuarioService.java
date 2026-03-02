@@ -19,8 +19,6 @@ public class UsuarioService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    // ========== MÉTODOS DE VERIFICACIÓN ==========
-
     public boolean existsByUsername(String username) {
         return usuarioRepository.existsByUsername(username);
     }
@@ -37,7 +35,7 @@ public class UsuarioService {
         return usuarioRepository.findByUsername(username);
     }
 
-    // ========== MÉTODOS CRUD BÁSICOS ==========
+    //crud
 
     // LEER TODOS LOS USUARIOS
     public List<Usuario> mostrarUsuarios() {
