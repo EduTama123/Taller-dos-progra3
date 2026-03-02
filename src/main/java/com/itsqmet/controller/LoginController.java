@@ -3,6 +3,7 @@ package com.itsqmet.controller;
 import com.itsqmet.entity.Usuario;
 import com.itsqmet.repository.UsuarioRepository;
 import com.itsqmet.roles.Rol;
+import com.itsqmet.service.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,25 +24,30 @@ public class LoginController {
     private UsuarioRepository usuarioRepository;
 
     @Autowired
+    private UsuarioService usuarioService;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     // Endpoint para login desde Angular
     @PostMapping("/login")  // <-- CORREGIDO: antes era "/api/auth/login"
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         try {
-            Usuario usuario = usuarioRepository.findByEmail(loginRequest.getEmail())
-                    .orElse(null);
+            Usuario loginUsuario = new Usuario();
+            loginUsuario.setEmail(loginRequest.getEmail());
+            loginUsuario.setPassword(loginRequest.getPassword());
 
-            if (usuario != null && passwordEncoder.matches(loginRequest.getPassword(), usuario.getPassword())) {
-                // No enviamos la contraseña por seguridad
-                usuario.setPassword(null);
-                return ResponseEntity.ok(usuario);
+            Map<String, String> resultado = usuarioService.autenticarConToken(loginUsuario);
+
+            if (resultado != null) {
+                return ResponseEntity.ok(resultado);
+            } else {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("error", "Credenciales inválidas"));
             }
-
-            return ResponseEntity.status(401).body(Map.of("error", "Credenciales inválidas"));
-
         } catch (Exception e) {
-            return ResponseEntity.status(500).body(Map.of("error", "Error interno del servidor"));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error en el servidor"));
         }
     }
 
