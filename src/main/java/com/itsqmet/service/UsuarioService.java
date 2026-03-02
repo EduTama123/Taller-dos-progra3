@@ -1,5 +1,6 @@
 package com.itsqmet.service;
 
+import com.itsqmet.component.JwtUtil;
 import com.itsqmet.entity.Usuario;
 import com.itsqmet.repository.UsuarioRepository;
 import com.itsqmet.roles.Rol;
@@ -8,7 +9,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -19,7 +22,8 @@ public class UsuarioService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    // ========== MÉTODOS DE VERIFICACIÓN ==========
+    @Autowired
+    private JwtUtil jwtUtil;
 
     public boolean existsByUsername(String username) {
         return usuarioRepository.existsByUsername(username);
@@ -37,7 +41,8 @@ public class UsuarioService {
         return usuarioRepository.findByUsername(username);
     }
 
-    // ========== MÉTODOS CRUD BÁSICOS ==========
+
+    //crud
 
     // LEER TODOS LOS USUARIOS
     public List<Usuario> mostrarUsuarios() {
@@ -127,6 +132,34 @@ public class UsuarioService {
 
         // Guardar usuario (la contraseña se encripta en guardarUsuario)
         return guardarUsuario(usuario);
+    }
+
+    // ========== NUEVO MÉTODO DE AUTENTICACIÓN CON TOKEN ==========
+    public Map<String, String> autenticarConToken(Usuario loginUsuario) {
+        Optional<Usuario> usuarioEncontrado = usuarioRepository.findByEmail(loginUsuario.getEmail());
+
+        if (usuarioEncontrado.isPresent()) {
+            Usuario usuario = usuarioEncontrado.get();
+
+            // Verificamos la contraseña
+            if (passwordEncoder.matches(loginUsuario.getPassword(), usuario.getPassword())) {
+                // Generar token JWT
+                String token = jwtUtil.generarToken(usuario.getEmail(), usuario.getRol().name());
+
+                // Preparar respuesta
+                Map<String, String> response = new HashMap<>();
+                response.put("token", token);
+                response.put("email", usuario.getEmail());
+                response.put("rol", usuario.getRol().name());
+                response.put("id", usuario.getId().toString());
+                response.put("nombre", usuario.getNombre());
+
+                return response;
+            }
+        }
+
+        // Si usuario no existe o contraseña inválida
+        return null;
     }
 
     // ========== MÉTODOS DE AUTENTICACIÓN ==========

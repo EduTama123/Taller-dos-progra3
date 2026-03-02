@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.*;
 
-@Controller
+@RestController
 @RequestMapping("/api/tests")
 public class TestController {
 

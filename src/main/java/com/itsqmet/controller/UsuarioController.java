@@ -85,7 +85,7 @@ public class UsuarioController {
         }
     }
 
-    // ✅ DESCOMENTADO - PARA ELIMINAR
+    //PARA ELIMINAR
     @DeleteMapping("/{id}")
     public void deleteUsuario(@PathVariable Long id) {
         usuarioService.eliminarUsuario(id);
