@@ -125,12 +125,10 @@ public class TestAnsiedad {
 
         // Asignar nivel según puntuación
         if (this.puntuacionTotal <= 10) {
-            this.nivelAnsiedad = "Mínima";
-        } else if (this.puntuacionTotal <= 20) {
             this.nivelAnsiedad = "Leve";
-        } else if (this.puntuacionTotal <= 30) {
+        } else if (this.puntuacionTotal <= 20) {
             this.nivelAnsiedad = "Moderada";
-        } else {
+        } else if (this.puntuacionTotal <= 30) {
             this.nivelAnsiedad = "Severa";
         }
 
