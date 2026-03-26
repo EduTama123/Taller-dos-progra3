@@ -71,16 +71,49 @@ public class TestController {
         }
     }
 
+    //endpoit modificado - para devolver un map con tests y resumen
     @GetMapping("/historial-test/{usuarioId}")
     public ResponseEntity<?> obtenerHistorial(@PathVariable Long usuarioId) {
         try {
+            System.out.println("=== RECIBIDA PETICIÓN ===");
+            System.out.println("Usuario ID: " + usuarioId);
+
+            // 1. Crear el mapa de respuesta
+            Map<String, Object> respuesta = new HashMap<>();
+
+            // 2. Obtener el historial completo de tests
             List<TestAnsiedad> historial = testService.obtenerHistorialPorUsuario(usuarioId);
-            return ResponseEntity.ok(historial);
+            System.out.println("Tests encontrados: " + (historial != null ? historial.size() : 0));
+            respuesta.put("tests", historial != null ? historial : new ArrayList<>());
+
+            // 3. Obtener el resumen (con manejo de errores)
+            Map<String, Object> resumen = testService.obtenerResumenConProcedimiento(usuarioId);
+            System.out.println("Resumen obtenido: " + resumen);
+            respuesta.put("resumen", resumen);
+
+            System.out.println("Respuesta exitosa");
+            return ResponseEntity.ok(respuesta);
+
         } catch (Exception e) {
-            return ResponseEntity.badRequest()
-                    .body(Map.of("error", e.getMessage()));
+            System.err.println("ERROR EN CONTROLLER: " + e.getMessage());
+            e.printStackTrace();
+
+            //Devolver error con detalles
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            errorResponse.put("tests", new ArrayList<>());
+
+            Map<String, Object> resumenError = new HashMap<>();
+            resumenError.put("totalTests", 0);
+            resumenError.put("promedioPuntuacion", 0.0);
+            resumenError.put("ultimoNivel", "Error");
+            resumenError.put("mensaje", "Error al cargar estadísticas: " + e.getMessage());
+            errorResponse.put("resumen", resumenError);
+
+            return ResponseEntity.ok(errorResponse);
         }
     }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<?> obtenerTest(@PathVariable Long id) {

@@ -100,7 +100,7 @@ public class TestAnsiedad {
     @JoinColumn(name = "recomendacion_id")
     private Recomendacion recomendacion;
 
-    // Constructor para facilitar la creación
+    // Constructor para facilitar la creacion
     public TestAnsiedad(Usuario usuario, Integer p1, Integer p2, Integer p3, Integer p4, Integer p5,
                         Integer p6, Integer p7, Integer p8, Integer p9, Integer p10) {
         this.usuario = usuario;
@@ -118,7 +118,7 @@ public class TestAnsiedad {
         calcularResultados();
     }
 
-    // MÉTODO PARA CALCULAR RESULTADOS
+    //metodo para calular resultados
     public void calcularResultados() {
         this.puntuacionTotal = pregunta1 + pregunta2 + pregunta3 + pregunta4 + pregunta5 +
                 pregunta6 + pregunta7 + pregunta8 + pregunta9 + pregunta10;

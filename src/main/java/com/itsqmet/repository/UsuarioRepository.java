@@ -10,21 +10,21 @@ import java.util.Optional;
 
 @Repository
 public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
-    // Búsquedas por campos únicos
+    //busquedas por campos unicos
     Optional<Usuario> findByUsername(String username);
     Optional<Usuario> findByEmail(String email);
 
-    // Verificaciones de existencia
+    //verificaciones de existencia
     boolean existsByUsername(String username);
     boolean existsByEmail(String email);
 
-    // Búsquedas por otros campos
+    //busquedas por otros campos
     List<Usuario> findByRol(Rol rol);
 
 
-    // Búsqueda por nombre (contiene, ignorando mayúsculas)
+    //busqueda por nombre (contiene, ignorando mayusculas)
     List<Usuario> findByNombreContainingIgnoreCase(String nombre);
 
-    // Ordenamientos
+    //ordenamientos
     List<Usuario> findAllByOrderByNombreAsc();
 }

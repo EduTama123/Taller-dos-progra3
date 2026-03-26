@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface RecomendacionRepository extends JpaRepository<Recomendacion, Long> {
 
-    // BUSCAR RECOMENDACION POR NIVEL DE ANSIEDAD
+    //buscar recomendaciones por nivel de ansiedad
     Recomendacion findByNivelAnsiedad(String nivelAnsiedad);
 }

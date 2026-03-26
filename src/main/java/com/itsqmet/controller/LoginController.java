@@ -16,8 +16,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
-@RestController  // Cambiado de @Controller a @RestController
-@RequestMapping("/api/auth")  // Añadido para diferenciar de las vistas
+@RestController
+@RequestMapping("/api/auth")
 public class LoginController {
 
     @Autowired
@@ -29,8 +29,8 @@ public class LoginController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    // Endpoint para login desde Angular
-    @PostMapping("/login")  // <-- CORREGIDO: antes era "/api/auth/login"
+    //endpoint para login desde angular
+    @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         try {
             Usuario loginUsuario = new Usuario();
@@ -51,7 +51,7 @@ public class LoginController {
         }
     }
 
-    // Clase para la solicitud de login
+    //clase para la solicitud de login
     public static class LoginRequest {
         private String email;
         private String password;

@@ -112,7 +112,7 @@ public class UsuarioService {
         usuarioRepository.deleteById(id);
     }
 
-    // ========== MÉTODOS ESPECÍFICOS PARA REGISTRO ==========
+    //metodos especificos apra registro
 
     @Transactional
     public Usuario registrarUsuario(Usuario usuario) {
@@ -134,7 +134,7 @@ public class UsuarioService {
         return guardarUsuario(usuario);
     }
 
-    // ========== NUEVO MÉTODO DE AUTENTICACIÓN CON TOKEN ==========
+    //el nuevo metodo de autenticacion con token
     public Map<String, String> autenticarConToken(Usuario loginUsuario) {
         Optional<Usuario> usuarioEncontrado = usuarioRepository.findByEmail(loginUsuario.getEmail());
 
@@ -162,7 +162,7 @@ public class UsuarioService {
         return null;
     }
 
-    // ========== MÉTODOS DE AUTENTICACIÓN ==========
+    //metodos de autenticacion
 
     public Usuario autenticarUsuario(String usernameOrEmail, String password) {
         // Buscar por username o email
@@ -183,7 +183,7 @@ public class UsuarioService {
         throw new RuntimeException("CREDENCIALES INVÁLIDAS");
     }
 
-    // ========== MÉTODOS ADICIONALES ==========
+    //metodods por si acaso
 
     public long contarUsuarios() {
         return usuarioRepository.count();
