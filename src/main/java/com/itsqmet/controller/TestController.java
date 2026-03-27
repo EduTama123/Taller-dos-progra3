@@ -48,10 +48,10 @@ public class TestController {
             test.setPregunta9(Integer.parseInt(request.get("pregunta9").toString()));
             test.setPregunta10(Integer.parseInt(request.get("pregunta10").toString()));
 
-            // ASIGNAR LA FECHA ACTUAL ANTES DE CALCULAR RESULTADOS
+            //asignar la fecha actual
             test.setFechaRealizacion(LocalDateTime.now());
 
-            // Calcular resultados (puntuacionTotal y nivelAnsiedad)
+            //calcular resultados (puntuacionTotal y nivelAnsiedad)
             test.calcularResultados();
 
             TestAnsiedad guardado = testService.guardarTest(test);
@@ -98,7 +98,7 @@ public class TestController {
             System.err.println("ERROR EN CONTROLLER: " + e.getMessage());
             e.printStackTrace();
 
-            //Devolver error con detalles
+            //devolvemos error con detalles
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("error", e.getMessage());
             errorResponse.put("tests", new ArrayList<>());

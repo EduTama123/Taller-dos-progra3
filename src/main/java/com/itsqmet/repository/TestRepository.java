@@ -13,6 +13,7 @@ import java.util.List;
 public interface TestRepository extends JpaRepository<TestAnsiedad, Long> {
 
     List<TestAnsiedad> findByUsuarioOrderByFechaRealizacionDesc(Usuario usuario);
+    //procedimiento
     @Procedure(procedureName = "sp_historial_tests_usuario")
     void obtenerHistorialUsuario(
             @Param("p_usuario_id") Long usuarioId,
@@ -20,7 +21,7 @@ public interface TestRepository extends JpaRepository<TestAnsiedad, Long> {
             @Param("p_promedio_puntuacion") Double[] promedio,
             @Param("p_ultimo_nivel") String[] ultimoNivel
     );
-    // Métodos para cálculos manuales (fallback)
+    //metodos para calculos manuales
     @Query("SELECT COUNT(t) FROM TestAnsiedad t WHERE t.usuario.id = :usuarioId")
     Long countByUsuarioId(@Param("usuarioId") Long usuarioId);
 
