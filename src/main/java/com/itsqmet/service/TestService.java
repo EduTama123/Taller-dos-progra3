@@ -105,11 +105,11 @@ public class TestService {
             return "Aún no has realizado ningún test. ¡Realiza tu primera evaluación para conocer tu nivel de ansiedad!";
         }
         if (promedio <= 10) {
-            return "¡Excelente! Tu nivel de ansiedad es MÍNIMO. Continúa con tus hábitos saludables.";
+            return "¡Excelente! Tu nivel de ansiedad es LEVE. Continúa con tus hábitos saludables.";
         } else if (promedio <= 20) {
-            return "Tu nivel de ansiedad es LEVE. Te recomendamos practicar técnicas de respiración y relajación diariamente.";
+            return "Tu nivel de ansiedad es MODERADO. Te recomendamos practicar técnicas de respiración y relajación diariamente.";
         } else if (promedio <= 30) {
-            return "Tu nivel de ansiedad es MODERADO. Considera buscar apoyo profesional para mejorar tu bienestar.";
+            return "Tu nivel de ansiedad es SEVERO. Considera buscar apoyo profesional para mejorar tu bienestar.";
         } else {
             return "Tu nivel de ansiedad es SEVERO. Es importante que busques ayuda profesional lo antes posible.";
         }
